@@ -18,6 +18,7 @@ class CompanyDBHelper {
           CustomerNo TEXT PRIMARY KEY,
           TenantId INTEGER,
           DefaultBillAdd TEXT,
+          DefaultShippAdd TEXT,
           Type TEXT,
           SalesRep TEXT,
           CurrencyCode TEXT,
@@ -102,6 +103,12 @@ class CompanyDBHelper {
   Future addCompanies(List<Company> companies) async {
     try {
       final db = await DBProvider.db.database;
+      var sqltQuery = " PRAGMA table_info($tableName) ";
+      var ress = await db.rawQuery(sqltQuery);
+      if(!ress.toString().contains('DefaultShippAdd')){
+        sqltQuery="alter table $tableName add column DefaultShippAdd TEXT ";
+        await db.rawQuery(sqltQuery);
+      }
       print('Inside addCompanies after database connection received!');
       String values = "";
       List<Address> addressList = List<Address>();
@@ -125,14 +132,14 @@ class CompanyDBHelper {
         values +=
             '''( ${singleCompany.Id} ,"${getFormattedString(singleCompany.Name)}", "${getFormattedString(singleCompany.CustomerNo)}", 
              ${singleCompany.TenantId}, "${getFormattedString(singleCompany.CurrencyCode)}", ${singleCompany.CreditLimit},
-             ${singleCompany.Balance},"${getFormattedString(singleCompany.DefaultBillAdd)}", "${getFormattedString(singleCompany.Type)}", 
+             ${singleCompany.Balance},"${getFormattedString(singleCompany.DefaultBillAdd)}","${getFormattedString(singleCompany.DefaultShippAdd)}", "${getFormattedString(singleCompany.Type)}", 
             "${getFormattedString(singleCompany.SalesRep)}", $totalBal, $isActiveInt, "$City", "$PostCode" )  , ''';
       }
       values = values.substring(0, values.lastIndexOf(',') - 1);
 
       var res = await db.rawInsert('''
     INSERT OR REPLACE INTO $tableName ( Id, name, customerNo, tenantId, currencyCode, creditLimit, balance, 
-    defaultBillAdd, type, salesRep, totalBalance, IsActiveInt, City, PostCode )
+    defaultBillAdd,DefaultShippAdd, type, salesRep, totalBalance, IsActiveInt, City, PostCode )
           VALUES $values
     ''');
       if (addressList.length > 0) {

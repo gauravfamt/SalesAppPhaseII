@@ -98,15 +98,13 @@ class ProductDBHelper {
       final db = await DBProvider.db.database;
 
       var sqltQuery = " PRAGMA table_info($tableName) ";
-      print('testquery--- ${sqltQuery}');
       var ress = await db.rawQuery(sqltQuery);
       if(!ress.toString().contains('Description2')){
-        print('--Description2--Not Availble-----');
         sqltQuery="alter table $tableName add column Description2 TEXT ";
         await db.rawQuery(sqltQuery);
       }
       if(!ress.toString().contains('Description3')){
-        print('---Description3 -Not Availble-----');
+
         sqltQuery="alter table $tableName add column Description3 TEXT ";
         await db.rawQuery(sqltQuery);
       }

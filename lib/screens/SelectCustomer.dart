@@ -112,10 +112,11 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
     print('closeSearchDialog called of the Invoices page');
   }
 
+  String strDefaultBillingAddressCode="";
+  String strDefaultShipinAddressCode="";
+
   void handleCustomerSelectedSearch(Company selectedCompany) {
     print('Inside handleCustomerSelectedSearch fn of Invoice Screen');
-    print('customer number: ${selectedCompany.CustomerNo}');
-    print('customer address length: ${selectedCompany.addresses.length}');
     setState(() {
       _selectedCompany = selectedCompany;
       searchCompanyNumberController.text = selectedCompany.CustomerNo;
@@ -123,6 +124,11 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
       searchCompanyNameController.text = selectedCompany.Name;
       searchFieldContentCompanyName = selectedCompany.Name;
       addressBillingList = List<String>();
+
+      //Added by Gaurav Gurav 28-Sep-2022
+      strDefaultBillingAddressCode=selectedCompany.DefaultBillAdd;
+      strDefaultShipinAddressCode=selectedCompany.DefaultShippAdd;
+
       if (selectedCompany.addresses.isNotEmpty) {
         // check for billing
         var addressBilling = List<Address>();
@@ -231,9 +237,45 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
     String zip = "";
     bool isZipInitialized = false;
     if (addressList.isNotEmpty) {
-      print("billing address length more 0");
+      String addressString = "";
       for (var i = 0; i < addressList.length; i++) {
-        String addressString = "";
+        if(strDefaultBillingAddressCode==addressList[i].Code){
+          if (addressList[i].Address1 != null &&
+              addressList[i].Address1.isNotEmpty) {
+            addressString += ' ' + addressList[i].Address1;
+          }
+          if (addressList[i].City != null && addressList[i].City.isNotEmpty) {
+            addressString += ' ' + addressList[i].City;
+            if (!isCityInitialized) {
+              city = addressList[i].City;
+              isCityInitialized = true;
+            }
+          }
+          if (addressList[i].PostCode != null &&
+              addressList[i].PostCode.isNotEmpty) {
+            addressString += ' ' + addressList[i].PostCode;
+            if (!isZipInitialized) {
+              zip = addressList[i].PostCode;
+              isZipInitialized = true;
+            }
+          }
+          if (addressList[i].State != null && addressList[i].State.isNotEmpty) {
+            addressString += ' ' + addressList[i].State;
+          }
+          if (addressList[i].Country != null &&
+              addressList[i].Country.isNotEmpty) {
+            addressString += ' ' + addressList[i].Country;
+          }
+          if (addressString.isNotEmpty) {
+            listItems.add(addressString);
+            addressList.removeAt(i);
+          }
+          break;
+        }
+      }
+
+      for (var i = 0; i < addressList.length; i++) {
+        addressString = "";
         if (addressList[i].Address1 != null &&
             addressList[i].Address1.isNotEmpty) {
           addressString += addressList[i].Address1;
@@ -266,7 +308,6 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
         }
       }
     } else {
-      print("billing address length less 0");
       listItems.add("Select Address");
       // listItems.addAll({"Select Address": ""});
     }
@@ -352,8 +393,44 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
     bool isZipInitialized = false;
     if (addressList.isNotEmpty) {
       print("shipping address length more 0");
+      String addressString = "";
       for (var i = 0; i < addressList.length; i++) {
-        String addressString = "";
+        if(strDefaultShipinAddressCode==addressList[i].Code){
+          if (addressList[i].Address1 != null &&
+              addressList[i].Address1.isNotEmpty) {
+            addressString += ' ' + addressList[i].Address1;
+          }
+          if (addressList[i].City != null && addressList[i].City.isNotEmpty) {
+            addressString += ' ' + addressList[i].City;
+            if (!isCityInitialized) {
+              city = addressList[i].City;
+              isCityInitialized = true;
+            }
+          }
+          if (addressList[i].PostCode != null &&
+              addressList[i].PostCode.isNotEmpty) {
+            addressString += ' ' + addressList[i].PostCode;
+            if (!isZipInitialized) {
+              zip = addressList[i].PostCode;
+              isZipInitialized = true;
+            }
+          }
+          if (addressList[i].State != null && addressList[i].State.isNotEmpty) {
+            addressString += ' ' + addressList[i].State;
+          }
+          if (addressList[i].Country != null &&
+              addressList[i].Country.isNotEmpty) {
+            addressString += ' ' + addressList[i].Country;
+          }
+          if (addressString.isNotEmpty) {
+            listItems.addAll({addressString: addressList[i].Code});
+            addressList.removeAt(i);
+          }
+          break;
+        }
+      }
+      for (var i = 0; i < addressList.length; i++) {
+        addressString="";
         if (addressList[i].Address1 != null &&
             addressList[i].Address1.isNotEmpty) {
           addressString += ' ' + addressList[i].Address1;

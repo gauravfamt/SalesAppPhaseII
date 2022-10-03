@@ -265,20 +265,19 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage>
       List<StandardField> _sortedStandardFields =
           widget.addressesStandardFields;
       _sortedStandardFields.sort((a, b) =>
-          a.FieldName.toLowerCase().compareTo(b.FieldName.toLowerCase()));
+          a.SortOrder.compareTo(b.SortOrder));
 
       ///CHECKING ONLY IF STANDARD_FIELDS ARE DISPLAYED ON THE UI
       for (var sf = 0; sf < _sortedStandardFields.length; sf++) {
         StandardField _standardField = _sortedStandardFields[sf];
-
+        print('---------${_standardField.FieldName}');
         ///HERE CHECKING IF SHOW_ON_GRID IS TRUE
         ///THEN IF KEY EXISTS IN THE PROVIDED OBJECT IT's VALUE MUST NOT BE NULL
         if (_standardField.SectionName == 'Address' &&
             _standardField.ShowInGrid == true &&
             singleAddressObj.toJson().containsKey(_standardField.FieldName) &&
             singleAddressObj.toJson()[_standardField.FieldName] != null &&
-            singleAddressObj
-                    .toJson()[_standardField.FieldName]
+            singleAddressObj.toJson()[_standardField.FieldName]
                     .toString()
                     .trim()
                     .length >

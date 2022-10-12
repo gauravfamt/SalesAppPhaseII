@@ -139,7 +139,7 @@ class CompanyDBHelper {
 
       var res = await db.rawInsert('''
     INSERT OR REPLACE INTO $tableName ( Id, name, customerNo, tenantId, currencyCode, creditLimit, balance, 
-    defaultBillAdd,DefaultShippAdd, type, salesRep, totalBalance, IsActiveInt, City, PostCode )
+    defaultBillAdd, DefaultShippAdd, type, salesRep, totalBalance, IsActiveInt, City, PostCode )
           VALUES $values
     ''');
       if (addressList.length > 0) {

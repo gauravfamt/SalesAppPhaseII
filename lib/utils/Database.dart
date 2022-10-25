@@ -44,6 +44,16 @@ class DBProvider {
         await db.execute(CompanyDBHelper().getTableCreateQuery());
         print('Company Table created');
 
+//        var sqltQuery = " PRAGMA table_info(Company) ";
+//        print('Company ${sqltQuery}');
+//        var ress = await db.rawQuery(sqltQuery);
+//        print('ress ${ress}');
+//        if(!ress.toString().contains('DefaultShippAdd')){
+//          sqltQuery="alter table Company add column DefaultShippAdd TEXT ";
+//          await db.execute(sqltQuery);
+//          print('Company Table altered');
+//        }
+
         ///CREATING THE PRODUCT_TABLE
         await db.execute(ProductDBHelper().getTableCreateQuery());
         print('Product Table created');
@@ -56,9 +66,10 @@ class DBProvider {
         await db.execute(StandardFieldsDBHelper().getTableCreateQuery());
         print('StandardField Table created');
 
+
+
         ///CREATING THE STANDARD_DROPDOWN_FIELDS_TABLE
-        await db
-            .execute(StandardDropDownFieldsDBHelper().getTableCreateQuery());
+        await db .execute(StandardDropDownFieldsDBHelper().getTableCreateQuery());
         print('StandardDropDownFields Table created');
 
         ///CREATING THE ADD_QUOTE_TABLE

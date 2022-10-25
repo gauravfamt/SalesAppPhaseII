@@ -155,6 +155,29 @@ class CompanyDBHelper {
     }
   }
 
+
+  Future alterCompanyTable() async {
+    try {
+      final db = await DBProvider.db.database;
+      var sqltQuery = " PRAGMA table_info ($tableName) ";
+      var ress = await db.rawQuery(sqltQuery);
+      if(!ress.toString().contains('DefaultShippAdd')){
+        sqltQuery="alter table $tableName add column DefaultShippAdd TEXT ";
+        print('sqltQuery ${sqltQuery}');
+        await db.rawQuery(sqltQuery);
+      }
+    } catch (e) {
+      print('Error inside addCompanies');
+      print(e);
+      throw Future.error(e);
+    }
+  }
+
+
+
+
+
+
   ///IT RETURNS ALL THE COMPANIES LIST
   Future<List<Company>> getAllCompanies() async {
     final db = await DBProvider.db.database;

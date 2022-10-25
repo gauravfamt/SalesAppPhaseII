@@ -4406,12 +4406,12 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
                                             .text) ==
                                         0
                                     ? Text(
-                                        'Price : ${_quote.QuoteDetail[qd].QuoteDetailFields.firstWhere((element) => element.FieldName == "BasePrice").textEditingController.text}  ',
+                                        'Price : \$ ${_quote.QuoteDetail[qd].QuoteDetailFields.firstWhere((element) => element.FieldName == "BasePrice").textEditingController.text}  ',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: Colors.red))
                                     : Text(
-                                        'Price : ${_quote.QuoteDetail[qd].QuoteDetailFields.firstWhere((element) => element.FieldName == "BasePrice").textEditingController.text} ',
+                                        'Price : \$  ${_quote.QuoteDetail[qd].QuoteDetailFields.firstWhere((element) => element.FieldName == "BasePrice").textEditingController.text} ',
                                       )
                                 : Text(""),
                           ],

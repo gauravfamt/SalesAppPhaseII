@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:html_unescape/html_unescape.dart';
+import 'package:intl/intl.dart';
 import 'package:moblesales/helpers/index.dart';
 import 'package:moblesales/models/index.dart';
 import 'package:moblesales/screens/index.dart';
@@ -203,7 +204,7 @@ class _QuoteDetailsState extends State<QuoteDetails> {
                                                         padding: StyleUtils
                                                             .smallVerticalPadding,
                                                         child: Text(
-                                                          'Ext Amount: ${widget.quoteObj.Quotedetail[pos].ExtAmount}',
+                                                          'Ext Amount: \$ ${widget.quoteObj.Quotedetail[pos].ExtAmount}',
                                                           style: StyleUtils
                                                               .smallboldStyle,
                                                         ),
@@ -394,6 +395,7 @@ class _QuoteDetailsState extends State<QuoteDetails> {
       }
     }
     //Added by Mayuresh Started, Showing Qty & Ext Amt on Line Level, 07-19-2022
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -413,7 +415,7 @@ class _QuoteDetailsState extends State<QuoteDetails> {
         Padding(
           padding: StyleUtils.smallVerticalPadding,
           child: Text(
-            'Ext Amount: ${productExtAmt}',
+            'Ext Amount: \$ ${productExtAmt}',
             style: StyleUtils.smallboldStyle,
           ),
         ),

@@ -102,15 +102,11 @@ class _MyAPPState extends State<MyAPP> {
         print('Product Table Dropped');
         await db.execute(ProductDBHelper().getTableCreateQuery());
         print('Product Table created');
-
         prefs.setString(Session.isProductTableChange, "false");
-        var syncMasterResetRes =
-            await _syncMasterDBHelper.updateMasterTableLastSyncDateByName(
-          lastSyncDate: '',
-          masterTableName: ProductDBHelper().tableName,
+        var syncMasterResetRes = await _syncMasterDBHelper.updateMasterTableLastSyncDateByName(
+          lastSyncDate: '', masterTableName: ProductDBHelper().tableName,
         );
       }
-
       setInitialTokenValue();
     } catch (e) {
       print('Error inside HandleActionButtonEnableStatus ');

@@ -126,20 +126,7 @@ class _ProductDBTestState extends State<ProductDBTest> {
           CreatedDate: DateTime.now(),
           UpdatedDate: DateTime.now(),
         ),
-//        Product(
-//          Id: 3,
-//          ProductCode: 'P033',
-//          Description: 'P03_DESC',
-//          Status: 'ENABLED',
-//          ProductCategory: 'ALL',
-//          BasePrice: 10.0,
-//          BaseUnit: 'EUR',
-//          Weight: 10.0,
-//          IsTaxable: 'YES',
-//          UPCCode: '12345678',
-//          CreatedDate: 'TODAY_CREATED_AT_MULTIPLE_2',
-//          UpdatedDate: 'TODAY_UPDATED_AT_MULTIPLE_2',
-//        )
+
       ];
       _productDBHelper.addProducts(_productsList).then(
             (value) => {

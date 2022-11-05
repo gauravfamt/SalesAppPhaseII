@@ -270,14 +270,15 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage>
       ///CHECKING ONLY IF STANDARD_FIELDS ARE DISPLAYED ON THE UI
       for (var sf = 0; sf < _sortedStandardFields.length; sf++) {
         StandardField _standardField = _sortedStandardFields[sf];
-        print('---------${_standardField.FieldName}');
+
         ///HERE CHECKING IF SHOW_ON_GRID IS TRUE
         ///THEN IF KEY EXISTS IN THE PROVIDED OBJECT IT's VALUE MUST NOT BE NULL
         if (_standardField.SectionName == 'Address' &&
             _standardField.ShowInGrid == true &&
             singleAddressObj.toJson().containsKey(_standardField.FieldName) &&
             singleAddressObj.toJson()[_standardField.FieldName] != null &&
-            singleAddressObj.toJson()[_standardField.FieldName]
+            singleAddressObj
+                    .toJson()[_standardField.FieldName]
                     .toString()
                     .trim()
                     .length >

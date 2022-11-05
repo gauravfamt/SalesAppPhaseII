@@ -13,6 +13,7 @@ class Invoices {
   final bool IsReportAvailable;
   final List<InvoiceDetails> invoiceDetails;
   bool IsSelected;
+  List<QuoteInvoicingElement> quoteInvoicingElement;
 
   Invoices({
     this.DocumentNo,
@@ -26,17 +27,22 @@ class Invoices {
     this.IsReportAvailable,
     this.invoiceDetails,
     this.IsSelected = false,
+    this.quoteInvoicingElement
   });
 
   factory Invoices.fromJson(Map<String, dynamic> json) {
     String _documentDate = json['DocumentDate'] as String;
     _documentDate = Other().DisplayDate(_documentDate);
 
-    var invoiceDetailsListFromJson = json['InvoiceDetails'] as List;
+    var invoiceDetailsListFromJson = json['InvoiceDetails'] as List;var
+    quoteInvoicingListFromJson = json['InvoiceInvoicingElement'] as List;
 
     List<InvoiceDetails> InvoiceDetailsList = invoiceDetailsListFromJson
         .map((i) => InvoiceDetails.fromJson(i))
         .toList();
+
+    List<QuoteInvoicingElement> invoicingElementList =
+    quoteInvoicingListFromJson.map((i) => QuoteInvoicingElement.fromJson(i)).toList();
 
     return Invoices(
       DocumentNo: json['DocumentNo'] as String,
@@ -50,6 +56,7 @@ class Invoices {
       IsReportAvailable: json['IsReportAvailable'] as bool,
       invoiceDetails: InvoiceDetailsList,
       IsSelected: false,
+      quoteInvoicingElement: invoicingElementList,
     );
   }
 
@@ -66,6 +73,7 @@ class Invoices {
       'IsReportAvailable': IsReportAvailable,
       'invoiceDetails': invoiceDetails,
       'IsSelected': IsSelected,
+      'quoteInvoicingElement': quoteInvoicingElement,
     };
   }
 }

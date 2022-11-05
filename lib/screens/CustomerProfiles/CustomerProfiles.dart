@@ -147,7 +147,7 @@ class CustomerProfilesPageState extends State<CustomerProfilesPage> {
       if (searchFieldContent != null && searchFieldContent.trim().length > 0) {
         url = '$url&Searchtext=${searchFieldContent.trim().toUpperCase()}';
       }
-
+      print('$url');
       http.Client client = http.Client();
       final response = await client.get(url, headers: {
         "token": await Session.getData(Session.accessToken),
@@ -302,13 +302,22 @@ class CustomerProfilesPageState extends State<CustomerProfilesPage> {
       String companyCode = companies[recordPosition].CustomerNo;
       String url =
           '${await Session.getData(Session.apiDomain)}/${URLs.DELETE_COMPANY}?CompanyCode=$companyCode';
+
+      print('$url');
+
       http.Client client = http.Client();
+      print('${await Session.getData(Session.userName)}');
       final response = await client.get(url, headers: {
         "token": await Session.getData(Session.accessToken),
         "Username": await Session.getData(Session.userName)
       }).timeout(duration);
+
+      print('DELETE_COMPANY response.statusCode');
+      print(response.statusCode);
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
+        print('---------DELETE_COMPANY data---------');
+        print(response);
 //        await Future.delayed(new Duration(seconds: 5));
         setState(() {
           isFullScreenLoading = false;

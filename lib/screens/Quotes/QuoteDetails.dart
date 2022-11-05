@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:intl/intl.dart';
 import 'package:moblesales/helpers/index.dart';
+import 'package:moblesales/models/QuoteInvElement.dart';
 import 'package:moblesales/models/index.dart';
+import 'package:moblesales/models/quoteInvoicingElement.dart';
 import 'package:moblesales/screens/index.dart';
+import 'package:moblesales/utils/Helper/AddQuote/QuoteInvoicingElementDBHelper.dart';
 import 'package:moblesales/utils/Helper/AddressDBHelper.dart';
+import 'package:moblesales/utils/Helper/InvoiceElementDBHelper.dart';
 
 class QuoteDetails extends StatefulWidget {
   ///HOLDS QUOTE OBJECT WHICH DETAILS NEEDS TO BE DISPLAYED
@@ -46,23 +49,29 @@ class _QuoteDetailsState extends State<QuoteDetails> {
   String addressString;
   String addressCode;
 
+  InvoicingElementDBHelper invoicingElementDBHelper = new InvoicingElementDBHelper();
+  List<QuoteInvElement> quoteInvElement=[];
+  QuoteInvoicingElementDBHelper  quoteInvoicingElementDBHelper=new QuoteInvoicingElementDBHelper();
+
   @override
   void initState() {
     addressString = '';
+
     addressCode = widget.offlineQuoteObj == null
         ? widget.quoteObj.ShippingAddressCode
         : widget.offlineQuoteObj.QuoteHeader.first.QuoteHeaderFields
-            .firstWhere((element) => element.FieldName == 'ShippingAddressCode')
-            .FieldValue;
+        .firstWhere((element) => element.FieldName == 'ShippingAddressCode')
+        .FieldValue;
+
     fetchAddressValue(
         addressCode,
-        widget.offlineQuoteObj == null
-            ? widget.quoteObj.CustomerNo
-            : widget.offlineQuoteObj.QuoteHeader.first.QuoteHeaderFields
-                .firstWhere((element) => element.FieldName == 'CustomerNo')
-                .FieldValue,
-        widget.offlineQuoteObj == null ? "Online" : "Offline");
+        widget.offlineQuoteObj == null ?
+        widget.quoteObj.CustomerNo : widget.offlineQuoteObj.QuoteHeader.first.QuoteHeaderFields
+            .firstWhere((element) => element.FieldName == 'CustomerNo')
+            .FieldValue,widget.offlineQuoteObj == null ? "Online" : "Offline");
     _listViewRowsHelper = ListViewRowsHelper();
+    fetchOfflineInvoicingElements();
+    fetchInvoicingElements();
     super.initState();
   }
 
@@ -80,17 +89,12 @@ class _QuoteDetailsState extends State<QuoteDetails> {
                 this.setState(() {
                   if (widget.offlineQuoteObj == null) {
                     widget.quoteObj.ShippingAddressCode = addressCode;
-                    print(widget.quoteObj.ShippingAddressCode);
+                   // print(widget.quoteObj.ShippingAddressCode);
                   } else {
                     widget.offlineQuoteObj.QuoteHeader.first.QuoteHeaderFields
                         .firstWhere((element) =>
-                            element.FieldName == 'ShippingAddressCode')
+                    element.FieldName == 'ShippingAddressCode')
                         .FieldValue = addressCode;
-                    print(widget
-                        .offlineQuoteObj.QuoteHeader.first.QuoteHeaderFields
-                        .firstWhere((element) =>
-                            element.FieldName == 'ShippingAddressCode')
-                        .FieldValue);
                   }
                 });
                 Navigator.pop(context);
@@ -109,146 +113,155 @@ class _QuoteDetailsState extends State<QuoteDetails> {
       ///FIRST IS THE STANDARD_FIELDS_DATA IS NOT LOADED YET TILL THEN SHOWING LOADER
       child: widget.isDetailsFieldsLoading
           ? Center(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 50.0),
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.teal.shade100,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 50.0),
+          child: CircularProgressIndicator(
+            backgroundColor: Colors.teal.shade100,
+          ),
+        ),
+      )
+          :
+      //HERE CHECKING IF STANDARD FIELDS DATA AND ORDER DETAILS DATA IS AVAILABLE OR NOT
+      (widget.detailsOnGridStandardFields.length < 1 &&
+          widget.quoteObj.Quotedetail.length < 1)
+          ? Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(50.0),
+            child: Text(
+              'No Data Found For order details',
+              style:
+              TextStyle(color: AppColors.black, fontSize: 16.0),
+            ),
+          )
+        ],
+      )
+          : Container(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+          child: ListView(
+            children: <Widget>[
+              Card(
+                elevation: 2,
+                child: ExpansionTile(
+                  title: Text('Quote Header'),
+                  initiallyExpanded: true,
+                  children: <Widget>[ getQuoteHeaderSection()],
                 ),
               ),
-            )
-          :
-          //HERE CHECKING IF STANDARD FIELDS DATA AND ORDER DETAILS DATA IS AVAILABLE OR NOT
-          (widget.detailsOnGridStandardFields.length < 1 &&
-                  widget.quoteObj.Quotedetail.length < 1)
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              widget.quoteObj.quoteInvoicingElement.length>0?
+              Card(
+                elevation: 2,
+                child: ExpansionTile(
+                  title: Text('Invoicing Element'),
+                  initiallyExpanded: false,
+                  children: <Widget>[ Card(elevation: 2, child: getQuoteInvoicingElement()),],
+                ),
+              ):Column(),
+              Card(
+                elevation: 2,
+                child: ExpansionTile(
+                  initiallyExpanded: false,
+                  title: Text('Quote Details'),
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(50.0),
-                      child: Text(
-                        'No Data Found For order details',
-                        style:
-                            TextStyle(color: AppColors.black, fontSize: 16.0),
-                      ),
-                    )
-                  ],
-                )
-              : Container(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                    child: ListView(
-                      children: <Widget>[
-                        Card(
-                          elevation: 2,
-                          child: ExpansionTile(
-                            title: Text('Quote Header'),
-                            initiallyExpanded: true,
-                            children: <Widget>[ getQuoteHeaderSection()],
-                          ),
-                        ),
-                        Card(
-                          elevation: 2,
-                          child: ExpansionTile(
-                              initiallyExpanded: false,
-                              title: Text('Quote Details'),
-                              children: <Widget>[
-                                Card(
-                                  elevation: 2,
-                                  child: Column(
-                              children: List.generate(
-                                    widget.quoteObj.Quotedetail.length,
-                                    (pos) => Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                        2.0, 2.0, 2.0, 2.0),
-                                          child: ExpansionPanelList(
-                                            expansionCallback:
-                                                (int index, bool status) {
-                                              setState(() {
-                                                _activeMeterIndex =
-                                                    _activeMeterIndex == pos
-                                                        ? null
-                                                        : pos;
-                                              });
-                                            },
-                                            children: [
-                                              new ExpansionPanel(
-                                                canTapOnHeader: true,
-                                                isExpanded: _activeMeterIndex == pos,
-                                                headerBuilder: (BuildContext context,
-                                                        bool isExpanded) =>
-                                                    Padding(
-                                                  padding: const EdgeInsets.fromLTRB(
-                                                      10.0, 5.0, 0.0, 5.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
-                                                    children: <Widget>[
-                                                      Padding(
-                                                        padding: StyleUtils
-                                                            .smallVerticalPadding,
-                                                        child: Text(
-                                                          '${widget.quoteObj.Quotedetail[pos].Description} (${widget.quoteObj.Quotedetail[pos].ProductCode})',
-                                                        ),
-                                                      ),
-                                                      //Added by Mayuresh Started, Showing Qty & Ext Amt on Line Level, 07-19-2022
-                                                      Padding(
-                                                        padding: StyleUtils
-                                                            .smallVerticalPadding,
-                                                        child: Text(
-                                                          'Qty: ${widget.quoteObj.Quotedetail[pos].Quantity}',
-                                                          style: StyleUtils
-                                                              .smallboldStyle,
-                                                        ),
-                                                      ),
-                                                      Padding(
-                                                        padding: StyleUtils
-                                                            .smallVerticalPadding,
-                                                        child: Text(
-                                                          'Ext Amount: \$ ${widget.quoteObj.Quotedetail[pos].ExtAmount}',
-                                                          style: StyleUtils
-                                                              .smallboldStyle,
-                                                        ),
-                                                      ),
-                                                      //Added by Mayuresh Ends
-                                                    ],
-                                                  ),
-                                                ),
-                                                body: Container(
-                                                  child: ListViewRows(
-                                                    isActionsEnabled: false,
-                                                    standardFields: widget
-                                                        .detailsOnGridStandardFields,
-                                                    recordObj: widget
-                                                        .quoteObj.Quotedetail[pos],
-                                                    recordPosition: pos,
-                                                    isEntitySectionCheckDisabled:
-                                                        true,
-                                                    actionButtonRows: List<Row>(),
-                                                    showOnGridFields: true,
-                                                    isExcludedFieldEnabled: false,
-                                                    currencyCaption: widget
-                                                        .currencyCaptionSF.Caption,
-                                                  ),
+                    Card(
+                      elevation: 2,
+                      child: Column(
+                        children: List.generate(
+                            widget.quoteObj.Quotedetail.length,
+                                (pos) => Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  2.0, 2.0, 2.0, 2.0),
+                              child: ExpansionPanelList(
+                                expansionCallback:
+                                    (int index, bool status) {
+                                  setState(() {
+                                    _activeMeterIndex =
+                                    _activeMeterIndex == pos
+                                        ? null
+                                        : pos;
+                                  });
+                                },
+                                children: [
+                                  new ExpansionPanel(
+                                    canTapOnHeader: true,
+                                    isExpanded: _activeMeterIndex == pos,
+                                    headerBuilder: (BuildContext context,
+                                        bool isExpanded) =>
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              10.0, 5.0, 0.0, 5.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: StyleUtils
+                                                    .smallVerticalPadding,
+                                                child: Text(
+                                                  '${widget.quoteObj.Quotedetail[pos].Description} (${widget.quoteObj.Quotedetail[pos].ProductCode})',
                                                 ),
                                               ),
+                                              //Added by Mayuresh Started, Showing Qty & Ext Amt on Line Level, 07-19-2022
+                                              Padding(
+                                                padding: StyleUtils
+                                                    .smallVerticalPadding,
+                                                child: Text(
+                                                  'Qty: ${widget.quoteObj.Quotedetail[pos].Quantity}',
+                                                  style: StyleUtils
+                                                      .smallboldStyle,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: StyleUtils
+                                                    .smallVerticalPadding,
+                                                child: Text(
+                                                  'Ext Amount: \$ ${widget.quoteObj.Quotedetail[pos].ExtAmount}',
+                                                  style: StyleUtils
+                                                      .smallboldStyle,
+                                                ),
+                                              ),
+                                              //Added by Mayuresh Ends
                                             ],
                                           ),
-                                        )),
-                            ),
-                                )],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                                        ),
+                                    body: Container(
+                                      child: ListViewRows(
+                                        isActionsEnabled: false,
+                                        standardFields: widget
+                                            .detailsOnGridStandardFields,
+                                        recordObj: widget
+                                            .quoteObj.Quotedetail[pos],
+                                        recordPosition: pos,
+                                        isEntitySectionCheckDisabled:
+                                        true,
+                                        actionButtonRows: List<Row>(),
+                                        showOnGridFields: true,
+                                        isExcludedFieldEnabled: false,
+                                        currencyCaption: widget
+                                            .currencyCaptionSF.Caption,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                      ),
+                    )],
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget getOfflineQuoteHeaderSection() {
     return Column(
       children:
-          buildRows(widget.offlineQuoteObj.QuoteHeader[0].QuoteHeaderFields),
+      buildRows(widget.offlineQuoteObj.QuoteHeader[0].QuoteHeaderFields),
     );
   }
 
@@ -271,110 +284,117 @@ class _QuoteDetailsState extends State<QuoteDetails> {
       ///FIRST IS THE STANDARD_FIELDS_DATA IS NOT LOADED YET TILL THEN SHOWING LOADER
       child: widget.isDetailsFieldsLoading
           ? Center(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 50.0),
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.teal.shade100,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 50.0),
+          child: CircularProgressIndicator(
+            backgroundColor: Colors.teal.shade100,
+          ),
+        ),
+      )
+          :
+      //HERE CHECKING IF STANDARD FIELDS DATA AND ORDER DETAILS DATA IS AVAILABLE OR NOT
+      (widget.detailsOnGridStandardFields.length < 1 &&
+          widget.quoteObj.Quotedetail.length < 1)
+          ? Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(50.0),
+            child: Text(
+              'No Data Found For order details',
+              style:
+              TextStyle(color: AppColors.black, fontSize: 16.0),
+            ),
+          ),
+
+        ],
+      )
+          : Container(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+          child: ListView(
+            children: <Widget>[
+              Card(
+                elevation: 2,
+                child: ExpansionTile(
+                  title: Text('Quote Header'),
+                  initiallyExpanded: true,
+                  children: <Widget>[
+                    Card(elevation: 2, child: getOfflineQuoteHeaderSection()),
+                  ],
                 ),
               ),
-            )
-          :
-          //HERE CHECKING IF STANDARD FIELDS DATA AND ORDER DETAILS DATA IS AVAILABLE OR NOT
-          (widget.detailsOnGridStandardFields.length < 1 &&
-                  widget.quoteObj.Quotedetail.length < 1)
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              quoteInvElement.length >0 ?
+              Card(
+                elevation: 2,
+                child: ExpansionTile(
+                  title: Text('Invoicing Element'),
+                  initiallyExpanded: false,
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(50.0),
-                      child: Text(
-                        'No Data Found For order details',
-                        style:
-                            TextStyle(color: AppColors.black, fontSize: 16.0),
+                    Card(elevation: 2, child: getQuoteInvoicingElement()),
+                  ],
+                ),
+              ):Column(),
+
+              Card(
+                elevation: 2,
+                child: ExpansionTile(
+                  title: Text('Quote Details'),
+                  children: <Widget>[
+                    Card(
+                      elevation: 2,
+                      child: Column(
+                        children: List.generate(
+                            widget.offlineQuoteObj.QuoteDetail.length,
+                                (pos) => Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  2.0, 2.0, 2.0, 2.0),
+                              child: ExpansionPanelList(
+                                expansionCallback:
+                                    (int index, bool status) {
+                                  setState(() {
+                                    _activeMeterIndex =
+                                    _activeMeterIndex == pos
+                                        ? null
+                                        : pos;
+                                  });
+                                },
+                                children: [
+                                  new ExpansionPanel(
+                                    canTapOnHeader: true,
+                                    isExpanded: _activeMeterIndex == pos,
+                                    headerBuilder: (BuildContext context,
+                                        bool isExpanded) =>
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              10.0, 5.0, 0.0, 10.0),
+                                          child: getProductName(widget
+                                              .offlineQuoteObj
+                                              .QuoteDetail[pos]
+                                              .QuoteDetailFields),
+                                        ),
+                                    body: Container(
+                                      child: Column(
+                                        children: buildRows(widget
+                                            .offlineQuoteObj
+                                            .QuoteDetail[pos]
+                                            .QuoteDetailFields),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
                       ),
                     ),
-
                   ],
-                )
-              : Container(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                    child: ListView(
-                      children: <Widget>[
-                        Card(
-                          elevation: 2,
-                          child: ExpansionTile(
-                            title: Text('Quote Header'),
-                            initiallyExpanded: true,
-                            children: <Widget>[
-                              Card(elevation: 2, child: getOfflineQuoteHeaderSection()),
-                            ],
-                          ),
-                        ),
-//                      ExpandedWidget(
-//                        headerValue: '',
-//                        childWidget: getOfflineQuoteHeaderSection(),
-//                        initialExpanded: true,
-//                      ),
-                        Card(
-                          elevation: 2,
-                          child: ExpansionTile(
-                            title: Text('Quote Details'),
-                            children: <Widget>[
-                              Card(
-                                elevation: 2,
-                                child: Column(
-                                  children: List.generate(
-                                      widget.offlineQuoteObj.QuoteDetail.length,
-                                          (pos) => Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            2.0, 2.0, 2.0, 2.0),
-                                        child: ExpansionPanelList(
-                                          expansionCallback:
-                                              (int index, bool status) {
-                                            setState(() {
-                                              _activeMeterIndex =
-                                              _activeMeterIndex == pos
-                                                  ? null
-                                                  : pos;
-                                            });
-                                          },
-                                          children: [
-                                            new ExpansionPanel(
-                                              canTapOnHeader: true,
-                                              isExpanded: _activeMeterIndex == pos,
-                                              headerBuilder: (BuildContext context,
-                                                  bool isExpanded) =>
-                                                  Padding(
-                                                    padding: const EdgeInsets.fromLTRB(
-                                                        10.0, 5.0, 0.0, 10.0),
-                                                    child: getProductName(widget
-                                                        .offlineQuoteObj
-                                                        .QuoteDetail[pos]
-                                                        .QuoteDetailFields),
-                                                  ),
-                                              body: Container(
-                                                child: Column(
-                                                  children: buildRows(widget
-                                                      .offlineQuoteObj
-                                                      .QuoteDetail[pos]
-                                                      .QuoteDetailFields),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )),
-                                ),
-                              ),
-                            ],
 
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -395,7 +415,6 @@ class _QuoteDetailsState extends State<QuoteDetails> {
       }
     }
     //Added by Mayuresh Started, Showing Qty & Ext Amt on Line Level, 07-19-2022
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -428,12 +447,11 @@ class _QuoteDetailsState extends State<QuoteDetails> {
   List<Widget> buildRows(List listObj) {
     List<Widget> _widgetsList = List<Widget>();
     for (var i = 0; i < listObj.length; i++) {
-      print('--${listObj[i].FieldName}');
       // //Hides CustomerName from Quote Header Details Screen, but shows in the List screen
       if (listObj[i].FieldName != 'OtherParam') {
         //Check which details should disply on grid
         var displayOnScreen = listObj.firstWhere(
-            (e) => e.FieldName == listObj[i].FieldName,
+                (e) => e.FieldName == listObj[i].FieldName,
             orElse: () => null);
         if (displayOnScreen != null) {
           _widgetsList.add(_buildRowDetails(listObj[i]));
@@ -467,11 +485,118 @@ class _QuoteDetailsState extends State<QuoteDetails> {
               RowDetailsField.FieldName == "DocumentDate"
                   ? '${Other().DisplayDate(RowDetailsField.FieldValue)}'
                   : RowDetailsField.FieldName == "BasePrice" ||
-                          RowDetailsField.FieldName == "ExtAmount" ||
-                          RowDetailsField.FieldName == "DocumentTotal"
-                      ? '${HtmlUnescape().convert(widget.currencyCaptionSF.Caption)} ' +
-                          '${RowDetailsField.FieldValue}'
-                      : '${RowDetailsField.FieldValue}',
+                  RowDetailsField.FieldName == "ExtAmount" ||
+                  RowDetailsField.FieldName == "DocumentTotal"
+                  ? '${HtmlUnescape().convert(widget.currencyCaptionSF.Caption)} ' +
+                  '${RowDetailsField.FieldValue}'
+                  : '${RowDetailsField.FieldValue}',
+              style: TextStyle(
+                  color: AppColors.black,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+          //_buildOfflineHeaderList(position),
+        ],
+      ),
+    );
+  }
+
+  void fetchOfflineInvoicingElements() {
+    try {
+      print('fetchOfflineInvoicingElements');
+      invoicingElementDBHelper.getAllInvoiceElements().then((invElementsRes) {
+        quoteInvoicingElementDBHelper.getInvoicingElementByQuoteHederNo(QuoteHeaderId:widget.offlineQuoteObj.Id).then((quoteInvElmentdata) {
+          for (InvoicingElement element in invElementsRes) {
+            var objQuoteInvElm = quoteInvElmentdata.firstWhere(
+                    (e) => e.InvoicingElementCode.toString() == element.code.toString(),
+                orElse: () => null);
+            if (objQuoteInvElm != null) {
+              setState(() {
+                if(objQuoteInvElm.InvoicingElementValue !=0)
+                quoteInvElement.add(new QuoteInvElement(invoicingElement:element,quoteHeaderId: widget.offlineQuoteObj.Id,invoicingElementvalue: objQuoteInvElm.InvoicingElementValue ) );
+              });
+            }
+            else{
+              print('objQuoteInvElm null');
+            }
+          }
+        });
+      }).catchError((err) {
+        print('Error while fetching Invoicing Elements from LocalDB');
+        print(err);
+      });
+    } catch (e) {
+      print("Error in fetchInvoicingElements");
+      print(e);
+    }
+  }
+
+  void fetchInvoicingElements() {
+    try {
+      print('fetchInvoicingElements');
+      invoicingElementDBHelper.getAllInvoiceElements().then((invElementsRes) {
+        if(widget.quoteObj !=null){
+          for (InvoicingElement element in invElementsRes) {
+            var objQuoteInvElm = widget.quoteObj.quoteInvoicingElement.firstWhere(
+                    (e) => e.InvoicingElementCode.toString() == element.code.toString(),
+                orElse: () => null);
+            if (objQuoteInvElm != null) {
+              setState(() {
+                if(objQuoteInvElm.InvoicingElementValue !=0)
+                quoteInvElement.add(new QuoteInvElement(invoicingElement:element,quoteHeaderId: widget.quoteObj.Id,invoicingElementvalue: objQuoteInvElm.InvoicingElementValue ) );
+              });
+            }
+            else{
+              print('objQuoteInvElm null');
+            }
+          }
+        }
+      }).catchError((err) {
+        print('Error while fetching Invoicing Elements from LocalDB');
+        print(err);
+      });
+    } catch (e) {
+      print("Error in fetchInvoicingElements");
+      print(e);
+    }
+  }
+
+  Widget getQuoteInvoicingElement() {
+    return Column(
+      children:
+      buildInvoicingElement(quoteInvElement),
+    );
+  }
+
+  List<Widget> buildInvoicingElement(List<QuoteInvElement> listObj) {
+    List<Widget> _widgetsList = List<Widget>();
+    for (var i = 0; i < listObj.length; i++) {
+      _widgetsList.add(_buildInvoicingElementRow(listObj[i]));
+    }
+    return _widgetsList;
+  }
+
+  Widget _buildInvoicingElementRow(QuoteInvElement QIE) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(15.0, 5.0, 10.0, 5.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            flex: 2,
+            child: Text(
+              '${QIE.invoicingElement.description}',
+              style: TextStyle(
+                color: AppColors.grey,
+                fontSize: 15,
+              ),
+            ),
+          ),
+
+          Expanded(
+            flex: 1,
+            child: Text('\$ ${QIE.invoicingElementvalue}',
               style: TextStyle(
                   color: AppColors.black,
                   fontSize: 15,
@@ -489,7 +614,7 @@ class _QuoteDetailsState extends State<QuoteDetails> {
     try {
       await addressDBhelper
           .getAddressByCode(
-              addressCode: addressCode, customerCode: customerCode)
+          addressCode: addressCode, customerCode: customerCode)
           .then((value) {
         this.setState(() {
           if (quoteType.toString().toLowerCase().replaceAll(' ', '') ==
@@ -503,10 +628,6 @@ class _QuoteDetailsState extends State<QuoteDetails> {
                 .firstWhere(
                     (element) => element.FieldName == 'ShippingAddressCode')
                 .FieldValue = formatAddress(value);
-            // print(widget.offlineQuoteObj.QuoteHeader.first.QuoteHeaderFields
-            //     .firstWhere(
-            //         (element) => element.FieldName == 'ShippingAddressCode')
-            //     .FieldValue);
           }
         });
       });

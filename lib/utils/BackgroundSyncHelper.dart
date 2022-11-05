@@ -39,7 +39,6 @@ void sfInsertUpdateBackgroundEntryPoint() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     print('EXECUTING BACKGROUND TASK TO SYNC STANDARD_FIELDS DATA');
-     alterTabels();
     _tokenDBHelper
         .getLocalDBTokens()
         .then((localTokensRes) => {
@@ -51,7 +50,8 @@ void sfInsertUpdateBackgroundEntryPoint() async {
                     tokenValue: localTokensRes[0].Token,
                     apiDomain: localTokensRes[0].ApiDomain,
                     userName: localTokensRes[0].Username,
-                  ).then((value) => {
+                  )
+                      .then((value) => {
                             print('LocalDB Data insert response received'),
                           })
                       .catchError((e) => {
@@ -75,19 +75,6 @@ void sfInsertUpdateBackgroundEntryPoint() async {
   }
 }
 
-
-void alterTabels() async {
-  try{
-    print('Alter Table');
-    _companyDBHelper.alterCompanyTable();
-    _productDBHelper.alterProductTable();
-  }
-  catch(e){
-    print('Error inside alterTabel');
-    print(e);
-  }
-}
-
 ///IT CALLS METHOD_CHANNEL TO INSERT UPDATE STANDARD FIELDS IN LOCAL_DB
 Future<void> backgroundedSFInsertUpdateHandler() {
   final CallbackHandle handle =
@@ -100,6 +87,7 @@ void lookupInsertUpdateBackgroundEntryPoint() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     print('EXECUTING BACKGROUND TASK TO SYNC LOOKUPS MASTERS DATA');
+    alterTabels();
     _tokenDBHelper
         .getLocalDBTokens()
         .then((localTokensRes) => {
@@ -140,6 +128,18 @@ void lookupInsertUpdateBackgroundEntryPoint() async {
             });
   } catch (e) {
     print('Error inside lookupInsertUpdateBackgroundEntryPoint');
+    print(e);
+  }
+}
+
+void alterTabels() async {
+  try{
+    print('Alter Table');
+    _companyDBHelper.alterCompanyTable();
+    _productDBHelper.alterProductTable();
+  }
+  catch(e){
+    print('Error inside alterTabel');
     print(e);
   }
 }
@@ -505,12 +505,8 @@ Future handleWMAPIProductDataInsert(
     String apiDomain = ''}) async {
   print('Inside Global handleWMAPIProductDataInsert Fn :');
   try {
-    Database _db = await DBProvider.db.database;
-    //to alter table
-    var addProductsRes = await _productDBHelper.alterProductTable();
     String _lastSyncDateUTCForSave = await ApiService.getCurrentDateTime(
         tokenValue: tokenValue, apiDomain: apiDomain);
-
     print(
         '_lastSyncDateUTC For Local Product Master Table: $_lastSyncDateUTCForSave');
     if (_lastSyncDateUTCForSave != 'ERROR') {
@@ -520,8 +516,10 @@ Future handleWMAPIProductDataInsert(
         apiDomain: apiDomain,
       );
       print('Products API response received ');
+
       if (apiProductsRes.length > 0) {
         print('Products Response records: ${apiProductsRes.length}');
+        Database _db = await DBProvider.db.database;
         if (_db != null) {
           print('Proceeding to insert Product data into localDB');
           var addProductsRes =
@@ -577,9 +575,6 @@ Future handleWMAPICompanyDataInsert({
       tokenValue: tokenValue,
       apiDomain: apiDomain,
     );
-    Database _db = await DBProvider.db.database;
-    var  res=  await _companyDBHelper.alterCompanyTable();
-
     print(
         '_lastSyncDateUTC For Local Company Master Table: $_lastSyncDateUTCForSave');
     if (_lastSyncDateUTCForSave != 'ERROR') {
@@ -593,7 +588,7 @@ Future handleWMAPICompanyDataInsert({
 
       if (apiCompaniesRes.length > 0) {
         print('Companies Response records: ${apiCompaniesRes.length}');
-
+        Database _db = await DBProvider.db.database;
         if (_db != null) {
           print('Proceeding to insert Company data into localDB');
           var addCompaniesRes =

@@ -96,16 +96,18 @@ class ProductDBHelper {
   Future addProducts(List<Product> products) async {
     try {
       final db = await DBProvider.db.database;
+
       var sqltQuery = " PRAGMA table_info($tableName) ";
+      print('testquery--- ${sqltQuery}');
       var ress = await db.rawQuery(sqltQuery);
       if(!ress.toString().contains('Description2')){
+        print('--Description2--Not Availble-----');
         sqltQuery="alter table $tableName add column Description2 TEXT ";
-        print('------#$sqltQuery');
         await db.rawQuery(sqltQuery);
       }
       if(!ress.toString().contains('Description3')){
+        print('---Description3 -Not Availble-----');
         sqltQuery="alter table $tableName add column Description3 TEXT ";
-        print('------#$sqltQuery');
         await db.rawQuery(sqltQuery);
       }
       print('Inside addProducts after database connection received!');
@@ -123,35 +125,6 @@ class ProductDBHelper {
           VALUES $values  
     ''');
 
-      return res;
-    } catch (e) {
-      print('Error inside addProducts');
-      print(e);
-//      return 'Unable to insert data into DB for Products';
-      throw Future.error(e);
-    }
-  }
-
-  Future alterProductTable() async {
-    try {
-      print('------alterProductTable');
-      var res=false;
-      final db = await DBProvider.db.database;
-      var sqltQuery = " PRAGMA table_info($tableName) ";
-      var ress = await db.rawQuery(sqltQuery);
-      print('--PRAGMA----${ress}');
-      if(!ress.toString().contains('Description2')){
-        sqltQuery="alter table $tableName add column Description2 TEXT ";
-        print('------#$sqltQuery');
-        await db.rawQuery(sqltQuery);
-        res=true;
-      }
-      if(!ress.toString().contains('Description3')){
-        sqltQuery="alter table $tableName add column Description3 TEXT ";
-        print('------#$sqltQuery');
-        await db.rawQuery(sqltQuery);
-        res=true;
-      }
       return res;
     } catch (e) {
       print('Error inside addProducts');
@@ -325,6 +298,35 @@ class ProductDBHelper {
     } catch (e) {
       print('Error inside updateProductBasePrice FN');
       print(e);
+      throw Future.error(e);
+    }
+  }
+
+  Future alterProductTable() async {
+    try {
+      print('------alterProductTable');
+      var res=false;
+      final db = await DBProvider.db.database;
+      var sqltQuery = " PRAGMA table_info($tableName) ";
+      var ress = await db.rawQuery(sqltQuery);
+      print('--PRAGMA----${ress}');
+      if(!ress.toString().contains('Description2')){
+        sqltQuery="alter table $tableName add column Description2 TEXT ";
+        print('------#$sqltQuery');
+        await db.rawQuery(sqltQuery);
+        res=true;
+      }
+      if(!ress.toString().contains('Description3')){
+        sqltQuery="alter table $tableName add column Description3 TEXT ";
+        print('------#$sqltQuery');
+        await db.rawQuery(sqltQuery);
+        res=true;
+      }
+      return res;
+    } catch (e) {
+      print('Error inside addProducts');
+      print(e);
+//      return 'Unable to insert data into DB for Products';
       throw Future.error(e);
     }
   }

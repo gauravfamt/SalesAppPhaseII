@@ -452,61 +452,70 @@ class CommonWidgets {
     );
   }
 
-  Widget commonTextField({
-    @required textValue,
-    label = '',
-    maxLength = 10,
-    maxLines = 1,
-    isReadOnly = false,
-    isRequired = false,
-    textInputType = TextInputType.text,
-    formTFTextStyle = StyleUtils.labelStyle,
-    bool isExpanded = false,
-    EdgeInsets outerPadding = StyleUtils.smallAllPadding,
-  }) {
-    try {
-      Widget _widget = Padding(
-          padding: outerPadding,
-          child: TextFormField(
-            maxLength: maxLength,
-            minLines: maxLines,
-            maxLines: maxLines,
-            readOnly: isReadOnly,
-            controller: new TextEditingController(text: textValue),
-            keyboardType: textInputType,
-            style: formTFTextStyle,
-            decoration: getFormTFInputDecoration('$label', true),
-            onChanged: (value) {
-              if (value != null && value != '') {
-                textValue = value;
-              }
-            },
-            validator: (value) {
-              if (isRequired) {
-                if (value.isEmpty) {
-                  return 'Enter the value for $label field';
-                }
-                try {
-                  textValue = value.toString();
-                } catch (e) {
-                  print(
-                      'Error while setting the value for the textEditingController For Header Fields');
-                  print(e);
-                }
-              }
-              return null;
-            },
-          ));
+  final TextStyle _formTFTextStyle = TextStyle(
+    color: AppColors.black,
+    fontFamily: 'OpenSans',
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+  );
 
-      return isExpanded ? Expanded(child: _widget) : _widget;
-    } catch (e) {
-      print("Error in commonTextField");
-      print(e);
-      return Container(
-        child: Text(e),
-      );
-    }
-  }
+//  Widget commonTextField({
+//    @required textValue,
+//    label,
+//    maxLength = 10,
+//    maxLines = 1,
+//    isReadOnly = false,
+//    isRequired = false,
+//    textInputType = TextInputType.text,
+//    bool isExpanded = false,
+//    EdgeInsets outerPadding = StyleUtils.smallAllPadding,
+//  }) {
+//    try {
+//      Widget _widget = Padding(
+//          padding: outerPadding,
+//          child: TextFormField(
+//            maxLength: maxLength,
+//            minLines: maxLines,
+//            maxLines: maxLines,
+//            readOnly: isReadOnly,
+//            controller: new TextEditingController(text: textValue),
+//            keyboardType: textInputType,
+//            style: _formTFTextStyle,
+//            decoration: getFormTFInputDecoration('$label', true),
+//            onChanged: (value) {
+//              if (value != null && value != '') {
+//                setState(() {
+//                  textValue = value;
+//                });
+//
+//                print(value);
+//              }
+//            },
+//            validator: (value) {
+//              if (isRequired) {
+//                if (value.isEmpty) {
+//                  return 'Enter the value for $label field';
+//                }
+//                try {
+//                  textValue = value.toString();
+//                } catch (e) {
+//                  print(
+//                      'Error while setting the value for the textEditingController For Header Fields');
+//                  print(e);
+//                }
+//              }
+//              return textValue;
+//            },
+//          ));
+//      return isExpanded ? Expanded(child: _widget) : _widget;
+//    } catch (e) {
+//      print("Error in commonTextField");
+//      print(e);
+//      return Container(
+//        child: Text(e),
+//      );
+//    }
+//  }
 
   InputDecoration getFormTFInputDecoration(
       String label, bool isShowCounterText) {
@@ -540,7 +549,6 @@ class CommonWidgets {
     print(widgets.length);
     try {
       List<Widget> wrapChildren = <Widget>[];
-
       if (MediaQuery.of(context).size.width > 1000) {
         int chunkSize = 4;
         for (var i = 0; i < widgets.length; i += chunkSize) {
@@ -567,7 +575,6 @@ class CommonWidgets {
                     ? widgets.length
                     : i + chunkSize),
           );
-
           wrapChildren.add(temp);
         }
         print(widgets.length);
@@ -583,7 +590,6 @@ class CommonWidgets {
                     ? widgets.length
                     : i + chunkSize),
           );
-
           wrapChildren.add(temp);
         }
         print(widgets.length);

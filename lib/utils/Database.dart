@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:moblesales/helpers/index.dart';
+import 'package:moblesales/utils/Helper/AddQuote/QuoteInvoicingElementDBHelper.dart';
 import 'package:moblesales/utils/index.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -14,7 +15,7 @@ class DBProvider {
     if (_database != null) {
       return _database;
     } else {
-      print('Need to Initialize Database ');
+      print('Need to Initialize Database ^ ');
     }
     _database = await initDB();
     return _database;
@@ -44,16 +45,6 @@ class DBProvider {
         await db.execute(CompanyDBHelper().getTableCreateQuery());
         print('Company Table created');
 
-//        var sqltQuery = " PRAGMA table_info(Company) ";
-//        print('Company ${sqltQuery}');
-//        var ress = await db.rawQuery(sqltQuery);
-//        print('ress ${ress}');
-//        if(!ress.toString().contains('DefaultShippAdd')){
-//          sqltQuery="alter table Company add column DefaultShippAdd TEXT ";
-//          await db.execute(sqltQuery);
-//          print('Company Table altered');
-//        }
-
         ///CREATING THE PRODUCT_TABLE
         await db.execute(ProductDBHelper().getTableCreateQuery());
         print('Product Table created');
@@ -66,10 +57,9 @@ class DBProvider {
         await db.execute(StandardFieldsDBHelper().getTableCreateQuery());
         print('StandardField Table created');
 
-
-
         ///CREATING THE STANDARD_DROPDOWN_FIELDS_TABLE
-        await db .execute(StandardDropDownFieldsDBHelper().getTableCreateQuery());
+        await db
+            .execute(StandardDropDownFieldsDBHelper().getTableCreateQuery());
         print('StandardDropDownFields Table created');
 
         ///CREATING THE ADD_QUOTE_TABLE
@@ -88,12 +78,10 @@ class DBProvider {
         await db.execute(InvoicingElementDBHelper().getTableCreateQuery());
         print('Invoice Element Table created');
 
-        ///CREATING THE SALES INVOICING_ELEMENT_TABLE
-        await db.execute(SalesInvoicingElementDBHelper().getTableCreateQuery());
-        print('Sales Invoice Element Table created');
+        await db.execute(QuoteInvoicingElementDBHelper().getTableCreateQuery());
+        print('Quote Invoicing Element Table created');
 
         SyncMasterDBHelper _syncMasterDBHelper = SyncMasterDBHelper();
-
         ///CREATING THE SYNC_MASTER_TABLE
         await db.execute(_syncMasterDBHelper.getTableCreateQuery());
         print('SyncMaster Table created');

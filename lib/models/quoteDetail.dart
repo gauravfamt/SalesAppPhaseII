@@ -37,21 +37,21 @@ class QuoteDetail {
   factory QuoteDetail.fromJson(Map<String, dynamic> json) {
     String _weight = json['Weight'] != null ? json['Weight'].toString() : '';
     return QuoteDetail(
-      Id: json['Id'] as int,
-      TenantId: json['TenantId'] as int,
-      ProductCode: json['ProductCode'] as String,
-      Description: json['Description'] as String,
-      Quantity: json['Quantity'] as int,
-      BasePrice: json['BasePrice'] as double,
-      ExtAmount: json['ExtAmount'] as double,
-      Discount: json['Discount'] as double,
-      Tax: json['Tax'] as String,
-      HeaderId: json['HeaderId'] as int,
-      CreatedDate: json['CreatedDate'] as String,
-      UpdatedDate: json['UpdatedDate'] as String,
-      Weight: _weight,
-      TotalWeight: json['TotalWeight'] as double,
-      ExtraParam: json['OtherParam'] as String
+        Id: json['Id'] as int,
+        TenantId: json['TenantId'] as int,
+        ProductCode: json['ProductCode'] as String,
+        Description: json['Description'] as String,
+        Quantity: json['Quantity'] as int,
+        BasePrice: json['BasePrice'] as double,
+        ExtAmount: json['ExtAmount'] as double,
+        Discount: json['Discount'] as double,
+        Tax: json['Tax'] as String,
+        HeaderId: json['HeaderId'] as int,
+        CreatedDate: json['CreatedDate'] as String,
+        UpdatedDate: json['UpdatedDate'] as String,
+        Weight: _weight,
+        TotalWeight: json['TotalWeight'] as double,
+        ExtraParam: json['OtherParam'] as String
     );
   }
 

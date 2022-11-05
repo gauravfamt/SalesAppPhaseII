@@ -359,13 +359,13 @@ class _QuotePageState extends State<QuotePage> {
       if (searchFieldContent != null && searchFieldContent.trim().length > 0) {
         url = '$url&Searchtext=${searchFieldContent.trim().toUpperCase()}';
       }
+      print('url--- ${url}');
 
       http.Client client = http.Client();
       final response = await client.get(url, headers: {
         "token": await Session.getData(Session.accessToken),
         "Username": await Session.getData(Session.userName),
       }).timeout(duration);
-
       if (response.statusCode == 200 && response.body != "No Quotes found") {
         var data = json.decode(response.body);
         if (data != 'No Quotes found') {
@@ -847,7 +847,6 @@ class _QuotePageState extends State<QuotePage> {
   ///       OTHERWISE IT'LL LOOK CONJESTED IN THE LIST VIEW
   List<Row> getActionButtonRows(int recordPosition) {
     List<Row> rowsList = List<Row>();
-
     ///ADDING THE FIRST ROW WITH ONE BUTTON FOR THE NAVIGATION
     rowsList.add(
       Row(

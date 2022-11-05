@@ -107,13 +107,14 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
   ///IT HOLDS THE SELECTED SHIPPING ADDRESS
   String _selectedShippingAddress;
 
+  //added by gaurav to set default biling and shipping address by default
+  String strDefaultBillingAddressCode = "";
+  String strDefaultShipinAddressCode = "";
+
   ///It closes the CompanySearch Dialog On CLose Btn click
   void closeSearchDialog() {
     print('closeSearchDialog called of the Invoices page');
   }
-
-  String strDefaultBillingAddressCode="";
-  String strDefaultShipinAddressCode="";
 
   void handleCustomerSelectedSearch(Company selectedCompany) {
     print('Inside handleCustomerSelectedSearch fn of Invoice Screen');
@@ -124,11 +125,9 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
       searchCompanyNameController.text = selectedCompany.Name;
       searchFieldContentCompanyName = selectedCompany.Name;
       addressBillingList = List<String>();
-
       //Added by Gaurav Gurav 28-Sep-2022
-      strDefaultBillingAddressCode=selectedCompany.DefaultBillAdd;
-      strDefaultShipinAddressCode=selectedCompany.DefaultShippAdd;
-
+      strDefaultBillingAddressCode = selectedCompany.DefaultBillAdd;
+      strDefaultShipinAddressCode = selectedCompany.DefaultShippAdd;
       if (selectedCompany.addresses.isNotEmpty) {
         // check for billing
         var addressBilling = List<Address>();
@@ -169,11 +168,6 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
 
   ///It Shows the customerSearch Dialog for selecting the customer for getting specified Customer's data
   void showCompanyDialog(String searchString, CustomerSearch type) {
-    print('inside showDialog');
-//    if (searchString != null && searchString
-//        .trim()
-//        .length > 0) {
-    print('inside showDialog valid');
     showDialog(
         useRootNavigator: true,
         barrierDismissible: false,
@@ -236,10 +230,11 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
     bool isCityInitialized = false;
     String zip = "";
     bool isZipInitialized = false;
+
+    String addressString = "";
     if (addressList.isNotEmpty) {
-      String addressString = "";
       for (var i = 0; i < addressList.length; i++) {
-        if(strDefaultBillingAddressCode==addressList[i].Code){
+        if (strDefaultBillingAddressCode == addressList[i].Code) {
           if (addressList[i].Address1 != null &&
               addressList[i].Address1.isNotEmpty) {
             addressString += ' ' + addressList[i].Address1;
@@ -274,6 +269,7 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
         }
       }
 
+      print("billing address length more 0");
       for (var i = 0; i < addressList.length; i++) {
         addressString = "";
         if (addressList[i].Address1 != null &&
@@ -308,6 +304,7 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
         }
       }
     } else {
+      print("billing address length less 0");
       listItems.add("Select Address");
       // listItems.addAll({"Select Address": ""});
     }
@@ -391,11 +388,11 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
     bool isCityInitialized = false;
     String zip = "";
     bool isZipInitialized = false;
+
+    String addressString = "";
     if (addressList.isNotEmpty) {
-      print("shipping address length more 0");
-      String addressString = "";
       for (var i = 0; i < addressList.length; i++) {
-        if(strDefaultShipinAddressCode==addressList[i].Code){
+        if (strDefaultShipinAddressCode == addressList[i].Code) {
           if (addressList[i].Address1 != null &&
               addressList[i].Address1.isNotEmpty) {
             addressString += ' ' + addressList[i].Address1;
@@ -429,8 +426,10 @@ class _SelectCustomerPageState extends State<SelectCustomerPage> {
           break;
         }
       }
+
+      print("shipping address length more 0");
       for (var i = 0; i < addressList.length; i++) {
-        addressString="";
+        String addressString = "";
         if (addressList[i].Address1 != null &&
             addressList[i].Address1.isNotEmpty) {
           addressString += ' ' + addressList[i].Address1;

@@ -34,4 +34,4 @@ export 'SyncMaster.dart';
 export 'TokenHelper.dart';
 export 'user.dart';
 export 'invoicingElement.dart';
-export 'salesInvoicingElement.dart';
+export 'quoteInvoicingElement.dart';

@@ -98,18 +98,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildRow(SyncMaster item) {
     print("Inside Settings._buildRow");
-    print('Last Sync Date ${item.LastSyncDate.toString()}');
     String strDate = '';
-    if (item.LastSyncDate.toString() != '' &&
-        item.LastSyncDate.toString() != null) {
+    if (item.LastSyncDate.toString() != '' && item.LastSyncDate.toString() != null) {
       print(item.TableName);
-      if (item.TableName.toString().toLowerCase().replaceAll(" ", "") ==
-          "autosaveinterval") {
+      if (item.TableName.toString().toLowerCase().replaceAll(" ", "") =="autosaveinterval") {
         item.TableName += "(in Seconds)";
         strDate = item.LastSyncDate.toString();
       } else {
-        strDate = Other().DisplayDateTime(
-            DateTime.parse(item.LastSyncDate.toString()).toString());
+        try{
+          strDate = Other().DisplayDateTime(DateTime.parse(item.LastSyncDate.toString()).toString());
+        }
+        catch(e){
+          strDate = item.LastSyncDate.toString();
+        }
       }
     }
     return Row(
@@ -183,11 +184,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SizedBox(
               height: 10.0,
             ),
-//            Text(
-//              'Last Synced: 12',
-//              textAlign: TextAlign.center,
-//            ),
-//            _buildCard(),
             Expanded(
               child: ListView.builder(
                 itemCount: _syncMasters.length,

@@ -148,14 +148,10 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
           await _syncMasterDBHelper.getAllSyncMasters();
       String apiDomain = await Session.getData(Session.apiDomain);
       String accessToken = await Session.getData(Session.accessToken);
-      var addProductsRes = await _productDBHelper.alterProductTable();
 
       SyncMaster productSyncMaster = _syncMasters.firstWhere(
           (element) => element.TableName == _productDBHelper.tableName);
 
-      if(addProductsRes=="true"){
-        productSyncMaster.LastSyncDate="01/01/2001";
-      }
       String _lastSyncDateUTCForSave = await ApiService.getCurrentDateTime(
           tokenValue: accessToken, apiDomain: apiDomain);
 
@@ -165,13 +161,14 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
           tokenValue: accessToken,
           apiDomain: apiDomain,
         );
-        Database _db = await DBProvider.db.database;
-
 
         if (apiProductsRes.length > 0) {
+          Database _db = await DBProvider.db.database;
           if (_db != null) {
-            var addProductsRes = await _productDBHelper.addProducts(apiProductsRes);
+            var addProductsRes =
+                await _productDBHelper.addProducts(apiProductsRes);
             print('Products Insert into Local Database is successful!');
+
             var lastSyncDateUpdateRes =
                 await _syncMasterDBHelper.updateMasterTableLastSyncDateByName(
               lastSyncDate: _lastSyncDateUTCForSave,
@@ -420,8 +417,7 @@ class _ProductSearchPageState extends State<ProductSearchPage> {
       physics: ScrollPhysics(),
       itemCount: _products.length,
       itemBuilder: (context, position) {
-        productQuantityTextEditingController
-            .add(new TextEditingController(text: ''));
+        productQuantityTextEditingController.add(new TextEditingController(text: ''));
         return Card(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),

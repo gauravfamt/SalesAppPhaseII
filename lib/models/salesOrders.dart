@@ -18,6 +18,7 @@ class SalesOrders {
   final String SalesSite;
   final List<OrderDetails> orderdetails;
   bool isSelected; //USED FOR CHECKBOX SELECTION IN LISTING
+  List<QuoteInvoicingElement> quoteInvoicingElement;
 
   SalesOrders({
     this.DocumentNo,
@@ -36,13 +37,18 @@ class SalesOrders {
     this.SalesSite,
     this.orderdetails,
     this.isSelected = false,
+    this.quoteInvoicingElement
   });
 
   factory SalesOrders.fromJson(Map<String, dynamic> json) {
     var orderDetailsListFromJson = json['Orderdetails'] as List;
+    var quoteInvoicingListFromJson = json['OrderInvoicingElement'] as List;
 
     List<OrderDetails> ordersList =
         orderDetailsListFromJson.map((i) => OrderDetails.fromJson(i)).toList();
+
+    List<QuoteInvoicingElement> invoicingElementList =
+    quoteInvoicingListFromJson.map((i) => QuoteInvoicingElement.fromJson(i)).toList();
 
     String _documentDate = json['DocumentDate'] as String;
     //_documentDate = transformDate(dateValue: _documentDate);
@@ -65,6 +71,7 @@ class SalesOrders {
       SalesSite: json['SalesSite'] as String,
       orderdetails: ordersList,
       isSelected: false,
+      quoteInvoicingElement: invoicingElementList,
     );
   }
 
@@ -87,6 +94,7 @@ class SalesOrders {
       'SalesSite': SalesSite,
       'orderdetails': orderdetails,
       'isSelected': isSelected,
+      'quoteInvoicingElement': quoteInvoicingElement,
     };
   }
 }

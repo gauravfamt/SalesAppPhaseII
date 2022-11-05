@@ -175,16 +175,14 @@ class _SalesOrderPageState extends State<SalesOrderPage> {
         "token": await Session.getData(Session.accessToken),
         "Username": await Session.getData(Session.userName),
       }).timeout(duration);
-
+      print(url);
       if (response.statusCode == 200 && response.body != "No Orders found") {
+        print(response.body);
         var data = json.decode(response.body);
         if (data != 'No Orders found') {
-          salesOrdersData = data
-              .map<SalesOrders>((json) => SalesOrders.fromJson(json))
-              .toList();
+          salesOrdersData = data .map<SalesOrders>((json) => SalesOrders.fromJson(json)).toList();
         }
       }
-
       return salesOrdersData;
     } catch (e) {
       print('Error inside fetchSalesOrders FN');

@@ -116,9 +116,6 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
         tokenValue: accessToken,
         apiDomain: apiDomain,
       );
-
-      Database _db = await DBProvider.db.database;
-      var  res=  await _companyDBHelper.alterCompanyTable();
       print(
           '_lastSyncDateUTC For Local Company Master Table: $_lastSyncDateUTCForSave');
       if (_lastSyncDateUTCForSave != 'ERROR') {
@@ -132,7 +129,7 @@ class _CustomerSearchDialogState extends State<CustomerSearchDialog> {
 
         if (apiCompaniesRes.length > 0) {
           print('Companies Response records: ${apiCompaniesRes.length}');
-
+          Database _db = await DBProvider.db.database;
           if (_db != null) {
             print('Proceeding to insert Company data into localDB');
             var addCompaniesRes =

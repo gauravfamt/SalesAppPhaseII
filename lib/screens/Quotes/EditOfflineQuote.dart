@@ -4,9 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart' as http;
 import 'package:moblesales/helpers/index.dart';
+import 'package:moblesales/models/QuoteInvElement.dart';
 import 'package:moblesales/models/index.dart';
 import 'package:moblesales/models/otherParams.dart';
+import 'package:moblesales/models/quoteInvoicingElement.dart';
 import 'package:moblesales/screens/index.dart';
+import 'package:moblesales/utils/Helper/AddQuote/QuoteInvoicingElementDBHelper.dart';
 import 'package:moblesales/utils/index.dart';
 import 'dart:convert';
 import 'dart:async';
@@ -85,6 +88,8 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
 
   ///IT SETS SET FOR CUSTOMER CREDIT LIMIT EXCEEDS
   bool isCustomerCreditLimitExceeds;
+
+  QuoteInvoicingElementDBHelper _quoteInvoicingElementDBHelper;
 
   ///IT HOLDS ALL THE FORM_TF TEXT_STYLE
   final TextStyle _formTFTextStyle = TextStyle(
@@ -266,6 +271,13 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
   ///Check if any dialog is open
   bool isDialogOpen = false;
 
+  InvoicingElementDBHelper invoicingElementDBHelper = new InvoicingElementDBHelper();
+  List<QuoteInvElement> quoteInvElement=[];
+  QuoteInvoicingElementDBHelper  quoteInvoicingElementDBHelper=new QuoteInvoicingElementDBHelper();
+
+  List<QuoteInvoicingElement> quoteInvoivingElement = <QuoteInvoicingElement>[];
+  ///Invoicing Element DB
+
   @override
   void initState() {
     super.initState();
@@ -307,12 +319,11 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
     _detailsOnScreenStandardFields = List<StandardField>();
     isAllProductSelected = false;
     zeroPriceProduct = List<ProductQuantity>();
-
+    _quoteInvoicingElementDBHelper=QuoteInvoicingElementDBHelper();
     ///Added by Mayuresh, 24-07-22
     ///Sets the Timer and Duration
-    intervalValue = 60;
+    intervalValue = 45;
     quoteAutoSaved = false;
-
     ///Shipping Addresses Variables
     shippingAddressCode = '';
     shippingAddresses = {};
@@ -344,6 +355,8 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
       _standardTaxDropDownFields = List<StandardDropDownField>();
       taxDropDownMenuItems = List();
       currencySymbol = '';
+      quoteInvElement=<QuoteInvElement>[];
+      quoteInvoivingElement=<QuoteInvoicingElement>[];
       setUserSalesSite();
 
       ///FIRST FETCHING TAX FIELD FROM DB
@@ -366,9 +379,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
       if (widget.Note != null) {
         noteController.text = widget.Note.toString();
       }
-
       NewQuoteDetailsIds = List<String>();
-
       selectedProductd = List<ProductQuantity>();
     }).catchError((err) {
       intervalDuration = new Duration(seconds: intervalValue);
@@ -1297,6 +1308,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
       this.setState(() {
         _quote = quoteObj;
         fetchShippingAddressesValue();
+        fetchInvoicingElements();
         print('isDetailsLoded');
       });
       //Added By Gaurav, 15-09-2020
@@ -1591,19 +1603,13 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
                         }
                       }),
                     },
-
                   this.setState(() {
                     _quote.QuoteHeader.add(value);
                   }),
-
                   ///HERE CHECKING IF ADDING QUOTE INITIALLY THEN ALSO CALL THE FUNCTION TO
                   /// ADD DEFAULT QUOTE_DETAIL ENTRY TO MAIN_QUOTE_OBJECT
                   if (isInitialLoading && isLoadingLocalQuote == 1)
                     {
-//                      addQuoteDetail(
-//                        quote: _quote,
-//                        isLoadingLocalQuote: isLoadingLocalQuote,
-                      //                     ),
                       AddProductData(0),
                     }
                   else
@@ -1948,8 +1954,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
                     .toString();
               }
               if (singleSF.FieldName == 'TotalWeight')
-                print(
-                    '${singleSF.FieldName} Value: ${singleQuoteDetail.toJson()['${singleSF.FieldName}']} ');
+              //  print('${singleSF.FieldName} Value: ${singleQuoteDetail.toJson()['${singleSF.FieldName}']} ');
               _temp.add(
                 QuoteDetailField(
                   AddQuoteID: quote.Id,
@@ -2083,8 +2088,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
         }
       }
 
-      print(
-          'quoteSalesSitesCodeNoList Selected SalesSites fetch $quoteSalesSitesCodeNoList');
+
 
       ///IF PRODUCT_CODE's LIST FOUND THEN FETCHING OFFLINE PRODUCTS FOM LOCAL_DATABASE
       if (quoteDetailsProductsCodeNoList.length > 0) {
@@ -2092,8 +2096,6 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
             await _productDBHelper.getProductsByProductCode(
           productCodeList: quoteDetailsProductsCodeNoList,
         );
-        print('Products List: $_products');
-
         ///HERE ASSIGNING THE PRODUCTS FETCHED FOR EACH QUOTE
         _products.forEach((singleProduct) {
           quoteObj.QuoteDetail.forEach((singleQuoteDetail) {
@@ -2134,7 +2136,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
       } else {
         _finalString += newStringToAppend;
       }
-      print('_finalString: $_finalString');
+
       return _finalString;
     } catch (e) {
       print('Error Inside getFormattedIdsString FN ');
@@ -2155,10 +2157,13 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
         print('Quote Headers Delete By QuoteID Res $_quoteHeaderDeleteRes');
         var _quoteDetailDeleteRes = await _addQuoteDetailDBHelper
             .deleteRowByQuoteId(addQuoteId: quoteId);
-        print('Quote Details Delete By QuoteID Res $_quoteDetailDeleteRes');
+
         var _quoteDeleteRes =
             await _addQuoteDBHelper.deleteRowById(addQuoteId: quoteId);
         print('Quote Delete By QuoteID Res $_quoteDeleteRes');
+
+        var _quoteInvoicingElement =await _quoteInvoicingElementDBHelper.deleteQuoteInvoicingElementByQuoteHeaderId(QuoteHeaderId: quoteId);
+        print('Quote Delete By QuoteID Res $_quoteInvoicingElement');
       } else {
         print('Invalid Quote Id Found for the deletion');
       }
@@ -2179,7 +2184,6 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
   void deleteAll() async {
     var _quoteDetailDeleteRes =
         await _addQuoteDetailDBHelper.deleteRowByQuoteId(addQuoteId: _quote.Id);
-    print('Quote Details Delete By QuoteID Res $_addQuoteDetailDBHelper');
     var _addQuoteUpdateRes = await AddQuoteDBHelper().updateFieldById(
       quoteId: _quote.Id,
       fieldName: 'QuoteDetailIds',
@@ -2201,7 +2205,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
             _quote.QuoteDetail[quoteDetailPosition].DetailReferenceId;
       });
 
-      print('quoteDetailPosition $quoteDetailPosition');
+
 
       String _updatedQuoteDetailsIds = getQuoteDetailIdsUpdated(
         splitText: ',',
@@ -2216,17 +2220,17 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
         fieldName: 'QuoteDetailIds',
         stringFieldValue: _updatedQuoteDetailsIds,
       );
-      print('addQuoteUpdateRes : $addQuoteUpdateRes');
+
 
       var quoteDetailFieldDelete =
           await _addQuoteDetailDBHelper.deleteRowByDetailRefId(
         detailReferenceId:
             _quote.QuoteDetail[quoteDetailPosition].DetailReferenceId,
       );
-      print('QuoteDetails Delete Response : $addQuoteUpdateRes');
+
 
       _quote.QuoteDetailIds = _updatedQuoteDetailsIds;
-      print('_updatedQuoteDetailsIds : $_updatedQuoteDetailsIds');
+
       _quote.QuoteDetail.removeAt(quoteDetailPosition);
       print('Remove quote :');
 
@@ -2259,26 +2263,26 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
         isFullScreenLoading = true;
       });
       for (int i = 0; i < NewQuoteDetailsIds.length; i++) {
-        print('quoteDetailId ${NewQuoteDetailsIds[i].toString()}');
+
         String _updatedQuoteDetailsIds = getQuoteDetailIdsUpdated(
           splitText: ',',
           stringToSplit: _quote.QuoteDetailIds,
           stringToExclude: NewQuoteDetailsIds[i].toString(),
         );
-        print('Updated Quote Details value: $_updatedQuoteDetailsIds');
+
 
         var addQuoteUpdateRes = await _addQuoteDBHelper.updateFieldById(
           quoteId: _quote.Id,
           fieldName: 'QuoteDetailIds',
           stringFieldValue: _updatedQuoteDetailsIds,
         );
-        print('addQuoteUpdateRes : $addQuoteUpdateRes');
+
 
         var quoteDetailFieldDelete =
             await _addQuoteDetailDBHelper.deleteRowByDetailRefId(
           detailReferenceId: NewQuoteDetailsIds[i].toString(),
         );
-        print('QuoteDetails Delete Response : $addQuoteUpdateRes');
+
 
         _quote.QuoteDetailIds = _updatedQuoteDetailsIds;
         print('_updatedQuoteDetailsIds : $_updatedQuoteDetailsIds');
@@ -2534,8 +2538,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
     //Drop Down Item List
     List<DropdownMenuItem<String>> dropDownMenuItems = List();
 
-    print("Inside getQuoteHeaderDDF");
-    print(selectedValue);
+
 
     ///IF ShippingAddressCode FIELD PRESENT THEN SETTING UP THE MULTI_LINE TEXT_FIELD
     if (fieldName == 'ShippingAddressCode') {
@@ -2711,13 +2714,6 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
     @required Product productObj,
     @required int quotePosition,
   }) {
-    print('productObj.ProductCode: ${productObj.ProductCode}');
-    print('selectedCompany.CustomerNo : ${selectedCompany.CustomerNo}');
-    print('UserSalesSite : ${userSalesSiteCode}');
-    print(
-        '_standardCurrencyDropDownField.Code : ${_standardCurrencyDropDownField.Code}');
-    print('_standardERPDropDownField.Code: ${_standardERPDropDownField.Code} ');
-
     ///CHECKING IF ALL THE REQUIRED FIELDS ARE PRESENT FOR THE API CALLS
     if (productObj.ProductCode != null &&
         selectedCompany.CustomerNo != null &&
@@ -2790,7 +2786,6 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
             }
             else if (singleQuoteElm.FieldName == 'OtherParam')//added bu Gaurav Gurav 31-Aug-2022
               {
-              print('-----OtherParam--  ${otherParam.toStringify().toString()}');
               singleQuoteElm.textEditingController.text =otherParam.toStringify().toString();
               singleQuoteElm.FieldValue =otherParam.toStringify().toString();
             }
@@ -2806,12 +2801,12 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
             }
           });
         });
-        print('quantity $quantity');
+
         QuantityOnChange(
           quoteDetailPosition: quotePosition,
           onChangedValue: quantity,
         );
-        print('quantity $quantity');
+
 
         ///UPDATES DOCUMENT_TOTAL
 
@@ -2970,7 +2965,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
               ),
             );
             if (selectedCompany != null) {
-              print('handleCompanyChange------');
+
               handleCompanyChange(
                 companyObj: selectedCompany,
                 quoteHeaderFieldPosition: qhf,
@@ -3127,7 +3122,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
       });
 
       int _qty = int.parse(onChangedValue.toString());
-      print('_qty: $_qty');
+
       double _realTimePrice =
           _quote.QuoteDetail[quoteDetailPosition].productRealTimePrice;
       int _realTimeQuantity =
@@ -3145,7 +3140,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
             "BasePrice") {
           _basePriceField =
               _quote.QuoteDetail[quoteDetailPosition].QuoteDetailFields[i];
-          print('BasePrice Found ${_basePriceField.FieldValue}');
+
           _basePrice = double.parse(_basePriceField.FieldValue);
           break;
         }
@@ -3207,7 +3202,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
     bool isValidate = true;
     try {
       int _qty = int.parse(onChangedValue);
-      print('_qty: $_qty');
+
       double _realTimePrice =
           _quote.QuoteDetail[quoteDetailPosition].productRealTimePrice;
       int _realTimeQuantity =
@@ -3225,7 +3220,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
             "BasePrice") {
           _basePriceField =
               _quote.QuoteDetail[quoteDetailPosition].QuoteDetailFields[i];
-          print('BasePrice Found ${_basePriceField.FieldValue}');
+
           if (_basePriceField.FieldValue != '')
             _basePrice = double.parse(_basePriceField.FieldValue);
           break;
@@ -3644,15 +3639,13 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
                     ? null
                     : () {
                         setState(() {
-                          print(
-                              'qty ${detailFieldObj.textEditingController.text}');
+
                           if (detailFieldObj.textEditingController.text == "" ||
                               detailFieldObj
                                   .textEditingController.text.isEmpty) {
                             detailFieldObj.textEditingController.text = "0";
                           }
-                          print(
-                              'qty ${detailFieldObj.textEditingController.text}');
+
                           int Quantity = int.parse(
                                   detailFieldObj.textEditingController.text) +
                               1;
@@ -3967,10 +3960,6 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
     @required
         int quoteDetailFieldPosition, //    int fieldRecordPosition, //Position for the single Field from the <_quoteDetailsList<quotesList>>
   }) {
-//    print(
-//        '_quote.QuoteDetail[quoteDetailPosition].TaxDropDownValue: ${_quote.QuoteDetail[quoteDetailPosition].TaxDropDownValue.Code}');
-//    print('taxDropDownMenuItems : $taxDropDownMenuItems');
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
       child: InputDecorator(
@@ -4100,6 +4089,9 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
           quoteDetailObj.QuoteDetailFields[qdf];
       String _fieldName = singleQuoteDetailField.FieldName;
       String _labelName = singleQuoteDetailField.LabelName;
+      if(_fieldName=="BasePrice" || _fieldName=="ExtAmount"){
+        _labelName += ' (\$)';
+      }
       if (singleQuoteDetailField.IsRequired) {
         _labelName += ' *';
       }
@@ -4411,7 +4403,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
                                             fontWeight: FontWeight.bold,
                                             color: Colors.red))
                                     : Text(
-                                        'Price : \$  ${_quote.QuoteDetail[qd].QuoteDetailFields.firstWhere((element) => element.FieldName == "BasePrice").textEditingController.text} ',
+                                        'Price : \$ ${_quote.QuoteDetail[qd].QuoteDetailFields.firstWhere((element) => element.FieldName == "BasePrice").textEditingController.text} ',
                                       )
                                 : Text(""),
                           ],
@@ -4536,23 +4528,12 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
           subHeaderString += '"Status" : "$_status" ,';
           print('subHeaderString: $subHeaderString');
         }
-        //Added by Gaurav,11-09-2020
-//        if (widget.listingQuoteObj != null) {
-//          if (widget.listingQuoteObj.IsIntegrated.toUpperCase() == "YES") {
-//            subHeaderString += '"IsIntegrated" : 1,';
-//          } else {
-//            subHeaderString += '"IsIntegrated" : 0,';
-//          }
-//        } else {
-//          //Added by Gaurav,14-07-2020
-//          subHeaderString += '"IsIntegrated" : 0,';
-//        }
+
         subHeaderString += '"IsIntegrated" : 0,';
         subHeaderString += '"IsEdit" :"false",';
         subHeaderString += '"SalesSite" :"${userSalesSiteCode}",';
         singleQuoteHeader.QuoteHeaderFields.forEach((singleField) {
-          print(
-              'Key : ${singleField.toJson()['FieldName']}   value : ${singleField.toJson()['FieldValue']}');
+
           var value =
               numericFieldNames.contains(singleField.toJson()['FieldName'])
                   ? double.parse(singleField.toJson()['FieldValue'])
@@ -4577,9 +4558,27 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
       quoteHeadersJsonString = quoteHeadersJsonString.substring(
           0, quoteHeadersJsonString.lastIndexOf(','));
       quoteHeadersJsonString += ' ], ';
-
       jsonRequestString += quoteHeadersJsonString;
-
+      //Added by Gaurav Gurav, 14-Oct-2022
+      //added invoicing element
+      var invoicingElementjson=' "QuoteInvoicingElement":[';
+      var invoicingElement='';
+      quoteInvElement.forEach((element)
+      {
+        element.invoicingElementvalue= double.parse(element.txtValue!=''? element.txtValue.toString():'0');
+        if(invoicingElement!=''){
+          invoicingElement+=',';
+        }
+        invoicingElement+='{';
+        invoicingElement+=' "InvoicingElementCode" :'+element.invoicingElement.code.toString();
+        invoicingElement+=', "InvoicingElementValue" :'+element.invoicingElementvalue.toString();
+        invoicingElement+='}';
+      });
+      invoicingElementjson +=invoicingElement;
+      invoicingElementjson += '],';
+      print('invoicingElementjson ======${invoicingElementjson}');
+      jsonRequestString += invoicingElementjson;
+      //end
       ///BUILDING QUOTE_DETAILS_FIELDS JSON
       var quoteDetailsJsonString = ' "QuoteDetail": [ ';
       _quote.QuoteDetail.forEach((singleQuoteDetail) {
@@ -4681,7 +4680,6 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
       print("Quotes Saving Res");
       _quote.QuoteHeader.forEach((element) {
         element.QuoteHeaderFields.forEach((element) {
-          print(element.FieldName + " " + element.FieldValue);
         });
       });
 
@@ -4692,15 +4690,12 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
           .then((value) => {
                 print('Quote header values local Update response '),
                 print(value),
-                // if (redirectToMain)
-                //   {
-                ///CALLING QUOTE_DETAIL UPDATE/INSERT
-                insertUpdateQuoteDetailsToDB(
-                  quote: _quote,
-                  forType: forType,
-                  redirectToMain: redirectToMain,
-                ),
-                // }
+                  insertUpdateInvoicingElementToDB(
+                    quote: _quote,
+                    forType: forType,
+                    redirectToMain: redirectToMain,
+                  )
+
               })
           .catchError((e) => {
                 print('Error Inside handleAddQuoteSaveToLocalDatabase '),
@@ -4709,6 +4704,56 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
               });
     } catch (e) {
       print('Error Inside insertUpdateQuoteHeadersToDB Catch Block ');
+      print(e);
+      setLocalDBUpdateError();
+    }
+  }
+
+  void insertUpdateInvoicingElementToDB({
+    AddQuote quote,
+    OfflineSaveType forType,
+    bool redirectToMain = true,
+  }) async {
+    try {
+      if (quoteInvElement.length > 0) {
+        quoteInvoivingElement.clear();
+        for (var i = 0; i < quoteInvElement.length; i++) {
+          quoteInvoivingElement.add(new QuoteInvoicingElement(
+            InvoicingElementCode: int.parse(
+                quoteInvElement[i].invoicingElement.code),
+            InvoicingElementValue: quoteInvElement[i].txtValue.toString()!=''? double.parse(
+                quoteInvElement[i].txtValue.toString()):0,
+            QuoteHeaderId: int.parse(
+                quoteInvElement[i].quoteHeaderId.toString()),
+            CreatedBy: "",
+            UpdatedBy: "",
+            CreatedDate: "",
+            UpdatedDate: "",
+          ));
+        }
+        _quoteInvoicingElementDBHelper.AddQuoteInvoicingElement(
+            quoteInvoivingElement
+        ).then((value) => {
+          print('insertUpdateInvoicingElementToDB Insert Update Response '),
+          print(value),
+          insertUpdateQuoteDetailsToDB(
+            quote: _quote,
+            forType: forType,
+            redirectToMain: redirectToMain,
+          ),
+        });
+      } else {
+        ///IF NO QUOTE DETAILS FOUND FOR SAVING THEN DIRECTLY NAVIGATING BACK TO THE LISTING PAGE
+        print(
+            'No Invoicing Element');
+        insertUpdateQuoteDetailsToDB(
+          quote: _quote,
+          forType: forType,
+          redirectToMain: redirectToMain,
+        );
+      }
+    } catch (e) {
+      print('Error Inside insertUpdateQuoteDetailsToDB Fn ');
       print(e);
       setLocalDBUpdateError();
     }
@@ -5256,16 +5301,28 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
                       )
                       : _commonWidgets.showCommonLoader(
                           isLoaderVisible: !(_quote.Id != null)),
+                  //Quote Invoicing Element
+                  _quote.Id != null
+                      ? Card(
+                    child: ExpansionTile(
+                      title:  Text('Invoicing Elements'),
+                      initiallyExpanded: false,
+                      children: <Widget>[  Card(
+                        child:  Padding(
+                            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: buildInvoicingElements(_quote.Id),
+                            )),
+                      )],
+                    ),
+                  )
+                      : _commonWidgets.showCommonLoader(
+                      isLoaderVisible: !(_quote.Id != null)),
 
                   ///QUOTE_DETAILS EXPANDABLE WIDGET
                   _quote.Id != null
-                      ? /*ExpandedWidget(
-                          headerValue: 'Quote Details',
-                          initialExpanded: true,
-                          childWidget: buildQuoteDetailsView(),
-                        )*/
-
-                        Card(child: ExpansionTile(
+                      ? Card(child: ExpansionTile(
                         title: Text('Quote Details'),
                         initiallyExpanded: false,
                         children: <Widget>[
@@ -5664,6 +5721,204 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
       ),
     );
   }
+
+  //Invoicing Element
+  void fetchInvoicingElements() {
+    try {
+      print('fetchInvoicingElements');
+      invoicingElementDBHelper.getAllInvoiceElements().then((invElementsRes) {
+        quoteInvoicingElementDBHelper.getInvoicingElementByQuoteHederNo(QuoteHeaderId:widget.quoteId).then((quoteInvElmentdata) {
+          for (InvoicingElement element in invElementsRes) {
+            var objQuoteInvElm = quoteInvElmentdata.firstWhere(
+                    (e) => e.InvoicingElementCode.toString() == element.code.toString(),
+                orElse: () => null);
+            if (objQuoteInvElm != null) {
+              setState(() {
+                quoteInvElement.add(new QuoteInvElement(invoicingElement:element,quoteHeaderId: widget.quoteId,invoicingElementvalue: objQuoteInvElm.InvoicingElementValue, txtValue:objQuoteInvElm.InvoicingElementValue.toString()  ) );
+              });
+            }
+            else{
+              print('objQuoteInvElm null');
+            }
+          }
+        });
+      }).catchError((err) {
+        print('Error while fetching Invoicing Elements from LocalDB');
+        print(err);
+      });
+    } catch (e) {
+      print("Error in fetchInvoicingElements");
+      print(e);
+    }
+  }
+
+  List<Widget> buildInvoicingElements(int quoteHeaderId) {
+    try {
+      print ('----buildInvoicingElements---');
+      List<Widget> _fields = <Widget>[];
+      ///Adds Invoicing Elements, if not empty
+      if (quoteInvElement.isNotEmpty) {
+        int pos= 0;
+        for (QuoteInvElement element in quoteInvElement) {
+          //print('txtValue ${element.txtValue}');
+          TextEditingController _textEditingController = new TextEditingController();
+          quoteInvElement[pos].textEditingController= new TextEditingController();
+          setState(() {
+            if(element.txtValue !='') {
+              _textEditingController.text=element.txtValue;
+              quoteInvElement[pos].textEditingController.text=element.txtValue;
+              if(element.txtValue=="0.0" ){
+                _textEditingController.text='';
+                quoteInvElement[pos].textEditingController.text='';
+              }
+              _textEditingController.selection = TextSelection.fromPosition(TextPosition(offset: _textEditingController.text.length));
+            }
+            else {
+              quoteInvElement[pos].textEditingController.text='';
+            }
+            quoteInvElement[pos].quoteHeaderId=quoteHeaderId;
+          });
+          _fields.add(
+              commonTextField(
+                  position: pos,
+                  isExpanded: true,
+                  textEditingController: _textEditingController
+              )
+          );
+          pos++;
+        }
+      }
+      List<Widget> temp;
+      setState(() {
+        temp = CommonWidgets().dynamicWidgetStyles(context, widgets: _fields);
+      });
+      return temp;
+    } catch (e) {
+      print('Error in buildInvoicingElements');
+      print(e);
+      return [];
+    }
+  }
+
+
+//  List<Widget> buildInvoicingElements(int quoteHeaderId) {
+//    try {
+//      print ('----buildInvoicingElements---');
+//      List<Widget> _fields = <Widget>[];
+//      ///Adds Invoicing Elements, if not empty
+//      if (quoteInvElement.isNotEmpty) {
+//        int pos= 0;
+//        for (QuoteInvElement element in quoteInvElement) {
+//          TextEditingController _textEditingController =new TextEditingController();
+//          setState(() {
+//            if(element.invoicingElementvalue!=0){
+//              _textEditingController.text=element.invoicingElementvalue.toString();
+//            }
+//            element.quoteHeaderId=quoteHeaderId;
+//          });
+//          _fields.add(
+//              commonTextField(
+//                  position: pos,
+//                  isExpanded: true,
+//                  textEditingController: _textEditingController
+//              )
+//          );
+//          pos++;
+//        }
+//      }
+//      List<Widget> temp;
+//      setState(() {
+//        temp = CommonWidgets().dynamicWidgetStyles(context, widgets: _fields);
+//      });
+//      return temp;
+//    } catch (e) {
+//      print('Error in buildInvoicingElements');
+//      print(e);
+//      return [];
+//    }
+//  }
+
+  Widget commonTextField({
+    @required int position,
+    bool isExpanded,
+    bool isRequired=false,
+    TextEditingController  textEditingController,
+    EdgeInsets outerPadding = StyleUtils.smallAllPadding,
+  }) {
+    try {
+      Widget _widget = TextFormField(
+        maxLength: 10,
+        controller: textEditingController,
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          WhitelistingTextInputFormatter(RegExp(r'(^\d*\.?\d{0,2})'))
+        ],
+        style: _formTFTextStyle,
+        decoration: getFormTFInputDecoration('${quoteInvElement[position].invoicingElement.description}', true),
+        onChanged: (value) {
+          quoteInvElement[position].txtValue=value.toString();
+        },
+        onEditingComplete: () {
+          FocusScope.of(context).nextFocus();
+        },
+      );
+      return isExpanded ? Expanded(child: _widget) : _widget;
+    } catch (e) {
+
+      print("Error in commonTextField");
+      print(e);
+      return Container(
+        child: Text(e),
+      );
+    }
+  }
+
+//  Widget commonTextField({
+//    @required int position,
+//    bool isExpanded,
+//    bool isRequired=false,
+//    TextEditingController  textEditingController,
+//    EdgeInsets outerPadding = StyleUtils.smallAllPadding,
+//  }) {
+//    try {
+//      Widget _widget = TextFormField(
+//        maxLength: 8,
+//        controller: textEditingController,
+//        keyboardType: TextInputType.numberWithOptions(decimal: true),
+//        inputFormatters: [
+//          WhitelistingTextInputFormatter(RegExp(r'(^\d*\.?\d{0,2})'))
+//        ],
+//        style: _formTFTextStyle,
+//        decoration: getFormTFInputDecoration('${quoteInvElement[position].invoicingElement.description}', true),
+//        onChanged: (value) {
+//          if (value != null && value != '') {
+//            print( value);
+//            setState(() {
+//              quoteInvElement[position].invoicingElementvalue=double.parse(value.toString());
+//            });
+//          }
+//        },
+//        validator: (value) {
+//          try {
+//            textEditingController.text = value.toString();
+//          } catch (e) {
+//            print('Error while setting the value for the textEditingController For Header Fields');
+//            print(e);
+//          }
+//          return null;
+//        },
+//      );
+//      return isExpanded ? Expanded(child: _widget) : _widget;
+//    } catch (e) {
+//
+//      print("Error in commonTextField");
+//      print(e);
+//      return Container(
+//        child: Text(e),
+//      );
+//    }
+//  }
+  //end
 
   void updateDataBase(List<ProductRealTimePrice> ProductList) {
     try {

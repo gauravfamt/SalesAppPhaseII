@@ -26,6 +26,7 @@ class Quotes {
   //Added by Mayuresh, Phase II, 24-07-22
   String CustomerName;
   String ShippingAddressCode;
+  List<QuoteInvoicingElement> quoteInvoicingElement;
   Quotes({
     this.Id,
     this.DocumentNo,
@@ -50,13 +51,18 @@ class Quotes {
     this.IsIntegrated,
     this.CustomerName,
     this.ShippingAddressCode,
+    this.quoteInvoicingElement,
   });
 
   factory Quotes.fromJson(Map<String, dynamic> json) {
     var quoteDetailListFromJson = json['Quotedetail'] as List;
+    var quoteInvoicingListFromJson = json['QuoteInvoicingElement'] as List;
 
     List<QuoteDetail> quotesList =
         quoteDetailListFromJson.map((i) => QuoteDetail.fromJson(i)).toList();
+
+    List<QuoteInvoicingElement> invoicingElementList =
+    quoteInvoicingListFromJson.map((i) => QuoteInvoicingElement.fromJson(i)).toList();
 
     String _documentDate = json['DocumentDate'] as String;
     //Added by Gaurav, 16-07-2020
@@ -86,6 +92,7 @@ class Quotes {
       Notes: json['Notes'] as String,
       IsIntegrated: json['IsIntegrated'] as String,
       Quotedetail: quotesList,
+      quoteInvoicingElement: invoicingElementList,
     );
   }
 
@@ -114,6 +121,7 @@ class Quotes {
       'PONumber': PONumber,
       'Notes': Notes,
       'IsIntegrated': IsIntegrated,
+      'quoteInvoicingElement': quoteInvoicingElement,
     };
   }
 }

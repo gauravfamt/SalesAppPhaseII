@@ -108,22 +108,14 @@ class InvoicingElementDBHelper {
   }
 
   ///IT RETURNS THE INVOICE ELEMENT LIST FROM CODE's PROVIDED
-  Future<List<InvoicingElement>> getAllInvoiceElements() async {
+  Future <List<InvoicingElement>> getAllInvoiceElements() async {
     try {
       List<InvoicingElement> _invoiceElement = List<InvoicingElement>();
       final db = await DBProvider.db.database;
       String _query = 'SELECT * FROM $tableName';
-      //  WHERE Code IN ( ';
-      // for (var cd = 0; cd < codeList.length; cd++) {
-      //   _query += '"${codeList[cd]}"';
-      //   if (cd < codeList.length - 1) {
-      //     _query += ',';
-      //   }
-      // }
-      // _query += ' ) ';
-      // // _query += " and Status = 'Active' ";
       print('getInvoiceElementByCode Query : $_query');
       var res = await db.rawQuery(_query);
+      print(res);
       List<InvoicingElement> _list = res.isNotEmpty
           ? res.map((c) => InvoicingElement.fromJson(c)).toList()
           : [];

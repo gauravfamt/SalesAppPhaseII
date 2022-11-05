@@ -20,7 +20,6 @@ class TokenDBHelper {
           )
           ''';
   }
-
   ///IT RETURNS THE TokenHelper TABLE ALL ENTRIES
   Future<List<TokenHelper>> getLocalDBTokens() async {
     try {

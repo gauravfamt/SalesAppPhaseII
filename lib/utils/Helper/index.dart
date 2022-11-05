@@ -9,4 +9,4 @@ export 'StandardFieldsDBHelper.dart';
 export 'SyncMasterDBHelper.dart';
 export 'TokenDBHelper.dart';
 export 'InvoiceElementDBHelper.dart';
-export 'SalesInvoicingElementDBHelper.dart';
+

@@ -100,6 +100,7 @@ class CompanyDBHelper {
   }
 
   /// IT INSERTS MULTIPLE COMPANIES DATA TO THE LOCAL_DB
+  /// Added DefaultShippAdd that was missing , 10-Oct-2022
   Future addCompanies(List<Company> companies) async {
     try {
       final db = await DBProvider.db.database;
@@ -116,7 +117,6 @@ class CompanyDBHelper {
         Company singleCompany = companies[i];
         int isActiveInt =
             singleCompany.IsActive != null && singleCompany.IsActive ? 1 : 0;
-
         double totalBal = singleCompany.TotalBalance != null
             ? singleCompany.TotalBalance
             : 0.0;
@@ -132,14 +132,15 @@ class CompanyDBHelper {
         values +=
             '''( ${singleCompany.Id} ,"${getFormattedString(singleCompany.Name)}", "${getFormattedString(singleCompany.CustomerNo)}", 
              ${singleCompany.TenantId}, "${getFormattedString(singleCompany.CurrencyCode)}", ${singleCompany.CreditLimit},
-             ${singleCompany.Balance},"${getFormattedString(singleCompany.DefaultBillAdd)}","${getFormattedString(singleCompany.DefaultShippAdd)}", "${getFormattedString(singleCompany.Type)}", 
-            "${getFormattedString(singleCompany.SalesRep)}", $totalBal, $isActiveInt, "$City", "$PostCode" )  , ''';
+             ${singleCompany.Balance},"${getFormattedString(singleCompany.DefaultBillAdd)}","${getFormattedString(singleCompany.DefaultShippAdd)}",
+              "${getFormattedString(singleCompany.Type)}","${getFormattedString(singleCompany.SalesRep)}",
+               $totalBal, $isActiveInt, "$City", "$PostCode" )  , ''';
       }
       values = values.substring(0, values.lastIndexOf(',') - 1);
 
       var res = await db.rawInsert('''
     INSERT OR REPLACE INTO $tableName ( Id, name, customerNo, tenantId, currencyCode, creditLimit, balance, 
-    defaultBillAdd, DefaultShippAdd, type, salesRep, totalBalance, IsActiveInt, City, PostCode )
+    defaultBillAdd,DefaultShippAdd, type, salesRep, totalBalance, IsActiveInt, City, PostCode )
           VALUES $values
     ''');
       if (addressList.length > 0) {
@@ -154,29 +155,6 @@ class CompanyDBHelper {
       throw Future.error(e);
     }
   }
-
-
-  Future alterCompanyTable() async {
-    try {
-      final db = await DBProvider.db.database;
-      var sqltQuery = " PRAGMA table_info ($tableName) ";
-      var ress = await db.rawQuery(sqltQuery);
-      if(!ress.toString().contains('DefaultShippAdd')){
-        sqltQuery="alter table $tableName add column DefaultShippAdd TEXT ";
-        print('sqltQuery ${sqltQuery}');
-        await db.rawQuery(sqltQuery);
-      }
-    } catch (e) {
-      print('Error inside addCompanies');
-      print(e);
-      throw Future.error(e);
-    }
-  }
-
-
-
-
-
 
   ///IT RETURNS ALL THE COMPANIES LIST
   Future<List<Company>> getAllCompanies() async {
@@ -410,4 +388,22 @@ class CompanyDBHelper {
       return Future.error(e);
     }
   }
+
+  Future alterCompanyTable() async {
+    try {
+      final db = await DBProvider.db.database;
+      var sqltQuery = " PRAGMA table_info ($tableName) ";
+      var ress = await db.rawQuery(sqltQuery);
+      if(!ress.toString().contains('DefaultShippAdd')){
+        sqltQuery="alter table $tableName add column DefaultShippAdd TEXT ";
+        print('sqltQuery ${sqltQuery}');
+        await db.rawQuery(sqltQuery);
+      }
+    } catch (e) {
+      print('Error inside addCompanies');
+      print(e);
+      throw Future.error(e);
+    }
+  }
+
 }

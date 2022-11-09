@@ -394,6 +394,7 @@ class CompanyDBHelper {
       final db = await DBProvider.db.database;
       var sqltQuery = " PRAGMA table_info ($tableName) ";
       var ress = await db.rawQuery(sqltQuery);
+      print('--PRAGMA----${ress}');
       if(!ress.toString().contains('DefaultShippAdd')){
         sqltQuery="alter table $tableName add column DefaultShippAdd TEXT ";
         print('sqltQuery ${sqltQuery}');

@@ -30,19 +30,18 @@ class SyncMasterDBHelper {
   // }
 
   ///IT INSERTS THE DEFAULT TABLE ENTRIES IN THE SYNC_MASTER TABLE
-  String getSyncMasterEntriesInsertQuery() {
+  Future<String> getSyncMasterEntriesInsertQuery() async {
     ///IT HOLDS THE SYNC_MASTER_TABLE INSERT QUERIES
     String _insertQuerySMD = '';
     try {
+      final db = await DBProvider.db.database;
       ///GETS THE DEFAULT ENTRIES AFTER THE TABLE IS CREATED
       List<SyncMaster> _syncMasterData = getDefaultSyncMasterData();
-
+      print('_syncMasterData ${_syncMasterData.length}');
       ///HOLDS THE INSERT QUERY'S MULTIPLE VALUES
       String _tempQueryValues = '';
-
       ///HOLDS THE MAIN INSERT QUERY
       String _tempInsertQuery = '';
-
       ///ITERATING THROUGH EACH DEFAULT ENTRY TO PREPARE INSERT QUERY'S FINAL VALUES STRING
       _syncMasterData.forEach((singleSyncMasterEntry) {
         _tempQueryValues += '''(
@@ -60,8 +59,8 @@ class SyncMasterDBHelper {
           ''';
         _insertQuerySMD = _tempInsertQuery;
       }
-
-      return _insertQuerySMD;
+      await db.execute(_tempInsertQuery);
+      return "";
     } catch (e) {
       print('Error while inserting the Entries to the SyncMaster Table');
       print(e);

@@ -24,6 +24,26 @@ class InvoicingElementDBHelper {
           ''';
   }
 
+  Future<String> createTableOnBackgroundSyn() async {
+    try{
+      print('call createTableOnBackgroundSyn $tableName');
+      final db = await DBProvider.db.database;
+      String strQuery= '''
+          CREATE TABLE IF NOT EXISTS $tableName(
+                    Id INTEGER ,
+                    Code TEXT PRIMARY KEY,
+                    Description TEXT,
+                    CreatedDate datetime,
+                    UpdatedDate datetime
+          )
+          ''';
+      await db.execute(strQuery);
+    }catch (e) {
+      print('createTableOnBackgroundSyn $tableName');
+      throw Future.error(e);
+    }
+  }
+
   String getTableDropQuery() {
     return '''
           DROP TABLE IF EXISTS $tableName

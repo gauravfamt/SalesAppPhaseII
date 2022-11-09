@@ -8,7 +8,6 @@ class QuoteInvoicingElementDBHelper {
   final String tableName = 'QuoteInvoicingElement';
   final String oldTableName='SalesInvoicingElements';
   String getTableCreateQuery() {
-   // deleteOldTable();
     return '''
           CREATE TABLE IF NOT EXISTS $tableName(
           Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -103,6 +102,30 @@ class QuoteInvoicingElementDBHelper {
     } catch (e) {
       //print('Error inside deleteQuoteInvoicingElementByQuoteHeaderId FN in QuoteInvoicingElementDBHelper');
       //print(e);
+      throw Future.error(e);
+    }
+  }
+
+
+  Future<String> createTableOnBackgroundSyn() async {
+    try{
+      print('call createTableOnBackgroundSyn $tableName');
+      final db = await DBProvider.db.database;
+      String strQuery= '''
+          CREATE TABLE IF NOT EXISTS $tableName(
+          Id INTEGER PRIMARY KEY AUTOINCREMENT,
+          QuoteHeaderId  INTEGER ,
+          InvoicingElementCode INTEGER ,
+          InvoicingElementValue REAL,
+          CreatedBy TEXT,
+          UpdatedBy TEXT,
+          CreatedDate TEXT,
+          UpdatedDate TEXT
+          )
+          ''';
+      await db.execute(strQuery);
+    }catch (e) {
+      print('createTableOnBackgroundSyn $tableName');
       throw Future.error(e);
     }
   }

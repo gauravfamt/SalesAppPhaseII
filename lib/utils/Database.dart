@@ -87,14 +87,7 @@ class DBProvider {
         print('SyncMaster Table created');
 
         ///GETTING SYNC_MASTER TABLE DEFAULT ENTRIES
-        String _syncMasterDefaultsInsertQuery =
-            _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
-        if (_syncMasterDefaultsInsertQuery != null &&
-            _syncMasterDefaultsInsertQuery.length > 0) {
-          print('Inserting SyncMaster Default Entries');
-          await db.execute(_syncMasterDefaultsInsertQuery);
-          print('SyncMaster Table Default entries created');
-        }
+        await _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
       },
       // onUpgrade: (db, oldVersion, newVersion) {
       // },

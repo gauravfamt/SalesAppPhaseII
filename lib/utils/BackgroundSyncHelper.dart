@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:moblesales/utils/Helper/AddQuote/QuoteInvoicingElementDBHelper.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:true_time/true_time.dart';
 import 'package:moblesales/models/index.dart';
@@ -28,11 +29,13 @@ InvoicingElementDBHelper _invoicingElementDBHelper = InvoicingElementDBHelper();
 StandardFieldsDBHelper _standardFieldsDBHelper = StandardFieldsDBHelper();
 
 ///PROVIDES STANDARD_DROPDOWN_FIELDS TABLE CRUD OPERATIONS
-StandardDropDownFieldsDBHelper _standardDropDownFieldsDBHelper =
-    StandardDropDownFieldsDBHelper();
+StandardDropDownFieldsDBHelper _standardDropDownFieldsDBHelper =StandardDropDownFieldsDBHelper();
 
 ///PROVIDES TOKEN_MASTER TABLE CRUD OPERATIONS
 TokenDBHelper _tokenDBHelper = TokenDBHelper();
+
+///PROVIDES INVOICING_ELEMENT TABLE CRUD OPERATIONS
+QuoteInvoicingElementDBHelper _quoteInvoicingElementDBHelper = QuoteInvoicingElementDBHelper();
 
 ///IT'S THE STANDARD_FIELDS BACKGROUND INSERT UPDATE ENTRY POINT
 void sfInsertUpdateBackgroundEntryPoint() async {
@@ -87,7 +90,6 @@ void lookupInsertUpdateBackgroundEntryPoint() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     print('EXECUTING BACKGROUND TASK TO SYNC LOOKUPS MASTERS DATA');
-    alterTabels();
     _tokenDBHelper
         .getLocalDBTokens()
         .then((localTokensRes) => {
@@ -132,11 +134,15 @@ void lookupInsertUpdateBackgroundEntryPoint() async {
   }
 }
 
-void alterTabels() async {
+void addAlterTabels() async {
   try{
     print('Alter Table');
-    _companyDBHelper.alterCompanyTable();
-    _productDBHelper.alterProductTable();
+    await _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
+    await _companyDBHelper.alterCompanyTable();
+    await _productDBHelper.alterProductTable();
+    await _quoteInvoicingElementDBHelper.createTableOnBackgroundSyn();
+    await _invoicingElementDBHelper.createTableOnBackgroundSyn();
+
   }
   catch(e){
     print('Error inside alterTabel');
@@ -377,15 +383,22 @@ Future handleWmLocalDbInsert({
   String apiDomain = '',
 }) async {
   try {
+
+    await addAlterTabels();
+
     ///FETCHING ALL THE MASTERS RECORDS TO SEND LAST_SYNC_DATES TO FETCH API RESPONSES
     List<SyncMaster> _syncMasters =
         await _syncMasterDBHelper.getAllSyncMasters();
     print("created _syncMasters");
 
+    _syncMasters.forEach((element) {
+      print('test ${element.TableName}');
+    });
+
     ///GETTING PRODUCT TABLE SYNC_MASTER ENTRY
     SyncMaster _productSyncMaster = _syncMasters.firstWhere(
         (element) => element.TableName == _productDBHelper.tableName);
-    print("created _productSyncMaster");
+    print('created _productSyncMaster');
 
     ///GETTING COMPANY TABLE SYNC_MASTER ENTRY
     SyncMaster _companySyncMaster = _syncMasters.firstWhere(
@@ -393,15 +406,9 @@ Future handleWmLocalDbInsert({
 
     print("created _companySyncMaster");
 
-    ///GETTING INVOICING ELEMENTS TABLE SYNC_MASTER ENTRY
-    SyncMaster _invoicingElementsSyncMaster = _syncMasters.firstWhere(
-        (element) => element.TableName == _invoicingElementDBHelper.tableName);
-    print("created _invoicingElementsSyncMaster");
-
     ///GETTING COMPANY TABLE SYNC_MASTER ENTRY
 //    SyncMaster _salesSiteSyncMaster = _syncMasters.firstWhere(
 //        (element) => element.TableName == _salesSiteDBHelper.tableName);
-
     ///PRODUCTS TABLE CRUD
     print(
         'Calling handleWMAPIProductDataInsert Fn To Insert Products data insertion to the local Db');
@@ -420,11 +427,16 @@ Future handleWmLocalDbInsert({
       Username: userName,
       apiDomain: apiDomain,
     );
-    print(
-        'Companies Data Inserted response received, returning final response');
+    print('Companies Data Inserted response received, returning final response');
     print(_companiesInsertRes);
 
     ///INVOICING ELEMENTS TABLE CRUD
+
+    ///GETTING INVOICING ELEMENTS TABLE SYNC_MASTER ENTRY
+    SyncMaster _invoicingElementsSyncMaster = _syncMasters.firstWhere(
+            (element) => element.TableName == _invoicingElementDBHelper.tableName);
+    print('created _invoicingElementsSyncMaster ${_invoicingElementsSyncMaster}');
+
     var _invoicingElementsInsertRes =
         await handleWMAPIInvoicingElementsDataInsert(
       invoicingElementSyncMaster: _invoicingElementsSyncMaster,

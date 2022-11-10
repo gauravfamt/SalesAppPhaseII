@@ -1,7 +1,16 @@
 import 'dart:async';
-import 'package:moblesales/helpers/index.dart';
-import 'package:moblesales/utils/Helper/AddQuote/QuoteInvoicingElementDBHelper.dart';
-import 'package:moblesales/utils/index.dart';
+import 'package:moblesales/helpers/constants.dart';
+import 'package:moblesales/utils/Helper/AddQuote/AddQuoteDBHelper.dart';
+import 'package:moblesales/utils/Helper/AddQuote/AddQuoteDetailDBHelper.dart';
+import 'package:moblesales/utils/Helper/AddQuote/AddQuoteHeaderDBHelper.dart';
+import 'package:moblesales/utils/Helper/AddressDBHelper.dart';
+import 'package:moblesales/utils/Helper/CompanyDBHelper.dart';
+import 'package:moblesales/utils/Helper/ProductDBHelper.dart';
+import 'package:moblesales/utils/Helper/StandardDropdownFieldsDBHelper.dart';
+import 'package:moblesales/utils/Helper/StandardFieldsDBHelper.dart';
+import 'package:moblesales/utils/Helper/SyncMasterDBHelper.dart';
+import 'package:moblesales/utils/Helper/SalesSiteDBHelper.dart';
+import 'package:moblesales/utils/Helper/TokenDBHelper.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
 import 'package:path/path.dart';
@@ -15,7 +24,7 @@ class DBProvider {
     if (_database != null) {
       return _database;
     } else {
-      print('Need to Initialize Database ^ ');
+      print('Need to Initialize Database ');
     }
     _database = await initDB();
     return _database;
@@ -74,23 +83,22 @@ class DBProvider {
         await db.execute(AddQuoteHeaderDBHelper().getTableCreateQuery());
         print('QuoteHeader Table created');
 
-        ///CREATING THE INVOICING_ELEMENT_TABLE
-        await db.execute(InvoicingElementDBHelper().getTableCreateQuery());
-        print('Invoice Element Table created');
-
-        await db.execute(QuoteInvoicingElementDBHelper().getTableCreateQuery());
-        print('Quote Invoicing Element Table created');
-
         SyncMasterDBHelper _syncMasterDBHelper = SyncMasterDBHelper();
+
         ///CREATING THE SYNC_MASTER_TABLE
         await db.execute(_syncMasterDBHelper.getTableCreateQuery());
         print('SyncMaster Table created');
 
         ///GETTING SYNC_MASTER TABLE DEFAULT ENTRIES
-        await _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
+        String _syncMasterDefaultsInsertQuery =
+        _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
+        if (_syncMasterDefaultsInsertQuery != null &&
+            _syncMasterDefaultsInsertQuery.length > 0) {
+          print('Inserting SyncMaster Default Entries');
+          await db.execute(_syncMasterDefaultsInsertQuery);
+          print('SyncMaster Table Default entries created');
+        }
       },
-      // onUpgrade: (db, oldVersion, newVersion) {
-      // },
       version: 1,
     );
   }

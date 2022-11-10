@@ -137,12 +137,19 @@ void lookupInsertUpdateBackgroundEntryPoint() async {
 void addAlterTabels() async {
   try{
     print('Alter Table');
-    await _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
+    final db = await DBProvider.db.database;
+    String _syncMasterDefaultsInsertQuery =await _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
+
+    if (_syncMasterDefaultsInsertQuery != null &&
+        _syncMasterDefaultsInsertQuery.length > 0) {
+      print('Inserting SyncMaster Default Entries');
+      await db.execute(_syncMasterDefaultsInsertQuery);
+      print('SyncMaster Table Default entries created');
+    }
     await _companyDBHelper.alterCompanyTable();
     await _productDBHelper.alterProductTable();
     await _quoteInvoicingElementDBHelper.createTableOnBackgroundSyn();
     await _invoicingElementDBHelper.createTableOnBackgroundSyn();
-
   }
   catch(e){
     print('Error inside alterTabel');
@@ -384,16 +391,12 @@ Future handleWmLocalDbInsert({
 }) async {
   try {
 
-    await addAlterTabels();
+     await addAlterTabels();
 
     ///FETCHING ALL THE MASTERS RECORDS TO SEND LAST_SYNC_DATES TO FETCH API RESPONSES
     List<SyncMaster> _syncMasters =
         await _syncMasterDBHelper.getAllSyncMasters();
     print("created _syncMasters");
-
-    _syncMasters.forEach((element) {
-      print('test ${element.TableName}');
-    });
 
     ///GETTING PRODUCT TABLE SYNC_MASTER ENTRY
     SyncMaster _productSyncMaster = _syncMasters.firstWhere(

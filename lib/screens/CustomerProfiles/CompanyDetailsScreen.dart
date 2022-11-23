@@ -210,14 +210,13 @@ class _CompanyDetailsPageState extends State<CompanyDetailsPage>
       for (var i = 0; i < widget.companyData.addresses.length; i++) {
         ///HERE CHECKING IF BILLING_ADDRESS PRESENT OR NOT
         if (forType == 1 &&
-            widget.companyData.addresses[i].IsShipping == false) {
+            widget.companyData.DefaultBillAdd == widget.companyData.addresses[i].Code) {
           singleAddressObj = widget.companyData.addresses[i];
           isAddressExist = true;
           break;
         } else if (forType == 2 &&
-            widget.companyData.addresses[i].IsShipping == true &&
-            widget.companyData.DefaultShippAdd ==
-                widget.companyData.addresses[i].Code) {
+           // widget.companyData.addresses[i].DefaultShipping == true &&
+            widget.companyData.DefaultShippAdd == widget.companyData.addresses[i].Code) {
           ///HERE CHECKING IF SHIPPING_ADDRESS PRESENT OR NOT
           singleAddressObj = widget.companyData.addresses[i];
           isAddressExist = true;

@@ -29,13 +29,15 @@ InvoicingElementDBHelper _invoicingElementDBHelper = InvoicingElementDBHelper();
 StandardFieldsDBHelper _standardFieldsDBHelper = StandardFieldsDBHelper();
 
 ///PROVIDES STANDARD_DROPDOWN_FIELDS TABLE CRUD OPERATIONS
-StandardDropDownFieldsDBHelper _standardDropDownFieldsDBHelper =StandardDropDownFieldsDBHelper();
+StandardDropDownFieldsDBHelper _standardDropDownFieldsDBHelper =
+    StandardDropDownFieldsDBHelper();
 
 ///PROVIDES TOKEN_MASTER TABLE CRUD OPERATIONS
 TokenDBHelper _tokenDBHelper = TokenDBHelper();
 
 ///PROVIDES INVOICING_ELEMENT TABLE CRUD OPERATIONS
-QuoteInvoicingElementDBHelper _quoteInvoicingElementDBHelper = QuoteInvoicingElementDBHelper();
+QuoteInvoicingElementDBHelper _quoteInvoicingElementDBHelper =
+    QuoteInvoicingElementDBHelper();
 
 ///IT'S THE STANDARD_FIELDS BACKGROUND INSERT UPDATE ENTRY POINT
 void sfInsertUpdateBackgroundEntryPoint() async {
@@ -135,10 +137,11 @@ void lookupInsertUpdateBackgroundEntryPoint() async {
 }
 
 void addAlterTabels() async {
-  try{
+  try {
     print('Alter Table');
     final db = await DBProvider.db.database;
-    String _syncMasterDefaultsInsertQuery =await _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
+    String _syncMasterDefaultsInsertQuery =
+        await _syncMasterDBHelper.getSyncMasterEntriesInsertQuery();
 
     if (_syncMasterDefaultsInsertQuery != null &&
         _syncMasterDefaultsInsertQuery.length > 0) {
@@ -150,8 +153,7 @@ void addAlterTabels() async {
     await _productDBHelper.alterProductTable();
     await _quoteInvoicingElementDBHelper.createTableOnBackgroundSyn();
     await _invoicingElementDBHelper.createTableOnBackgroundSyn();
-  }
-  catch(e){
+  } catch (e) {
     print('Error inside alterTabel');
     print(e);
   }
@@ -246,7 +248,8 @@ Future handleWmSFLocalDbInsert({
       showInGrid: false,
       apiDomain: apiDomain,
     );
-    print('QuoteDetails showOnScreen Data insert Response $_quoteDetailsSFForScreenInsertRes');
+    print(
+        'QuoteDetails showOnScreen Data insert Response $_quoteDetailsSFForScreenInsertRes');
 
     ///INSERTING CURRENCY_STANDARD_DROP_DOWN_FIELDS
     var _quoteCurrencyDropdownSFInsertRes =
@@ -267,7 +270,8 @@ Future handleWmSFLocalDbInsert({
       tokenValue: tokenValue,
       apiDomain: apiDomain,
     );
-    print('ERP StandardDropDownFields Data insert Response $_erpDropdownSFInsertRes');
+    print(
+        'ERP StandardDropDownFields Data insert Response $_erpDropdownSFInsertRes');
 
     ///INSERTING TAX_STANDARD_DROP_DOWN_FIELDS
     var _taxDropdownSFInsertRes =
@@ -277,7 +281,8 @@ Future handleWmSFLocalDbInsert({
       tokenValue: tokenValue,
       apiDomain: apiDomain,
     );
-    print('TAX StandardDropDownFields Data insert Response $_taxDropdownSFInsertRes');
+    print(
+        'TAX StandardDropDownFields Data insert Response $_taxDropdownSFInsertRes');
 
     ///INSERTING QUOTE_DROPDOWN_ENTITY
     var _quoteDropdownSFInsertRes =
@@ -297,6 +302,7 @@ Future handleWmSFLocalDbInsert({
     return Future.value(false);
   }
 }
+
 ///THIS FUNCTION HANDLES THE STANDARD_FIELDS DATA INSERT FROM API TO THE LOCAL_DB
 Future handleWMAPIStandardFieldsDataInsert(
     {String entity,
@@ -314,14 +320,17 @@ Future handleWMAPIStandardFieldsDataInsert(
       apiDomain: apiDomain,
     );
     if (standardFieldRes.length > 0) {
-      print('StandardFields Response records: ${standardFieldRes.length} for $entity Entity');
+      print(
+          'StandardFields Response records: ${standardFieldRes.length} for $entity Entity');
 
       Database _db = await DBProvider.db.database;
       if (_db != null) {
         //var deleteRes= await _standardFieldsDBHelper.removeStandardFieldEntitiwise(entity);
-       // print('old standard field id deleted for $entity entity into localDB');
-        print('Proceeding to insert StandardFields data  for $entity entity into localDB');
-        var addSFRes = await _standardFieldsDBHelper.addStandardFields(standardFieldRes);
+        // print('old standard field id deleted for $entity entity into localDB');
+        print(
+            'Proceeding to insert StandardFields data  for $entity entity into localDB');
+        var addSFRes =
+            await _standardFieldsDBHelper.addStandardFields(standardFieldRes);
         print(
             '$entity entity StandardFields data Insert into Local Database is successful!');
         return Future.value(true);
@@ -390,8 +399,7 @@ Future handleWmLocalDbInsert({
   String apiDomain = '',
 }) async {
   try {
-
-     await addAlterTabels();
+    await addAlterTabels();
 
     ///FETCHING ALL THE MASTERS RECORDS TO SEND LAST_SYNC_DATES TO FETCH API RESPONSES
     List<SyncMaster> _syncMasters =
@@ -430,15 +438,17 @@ Future handleWmLocalDbInsert({
       Username: userName,
       apiDomain: apiDomain,
     );
-    print('Companies Data Inserted response received, returning final response');
+    print(
+        'Companies Data Inserted response received, returning final response');
     print(_companiesInsertRes);
 
     ///INVOICING ELEMENTS TABLE CRUD
 
     ///GETTING INVOICING ELEMENTS TABLE SYNC_MASTER ENTRY
     SyncMaster _invoicingElementsSyncMaster = _syncMasters.firstWhere(
-            (element) => element.TableName == _invoicingElementDBHelper.tableName);
-    print('created _invoicingElementsSyncMaster ${_invoicingElementsSyncMaster}');
+        (element) => element.TableName == _invoicingElementDBHelper.tableName);
+    print(
+        'created _invoicingElementsSyncMaster ${_invoicingElementsSyncMaster}');
 
     var _invoicingElementsInsertRes =
         await handleWMAPIInvoicingElementsDataInsert(
@@ -736,6 +746,8 @@ Future handleWMAPIInvoicingElementsDataInsert({
         print('Invoicing Elements Response records: ${apiElementsRes.length}');
         Database _db = await DBProvider.db.database;
         if (_db != null) {
+          // print('Clearing All Current Data of Invoicing Elements');
+          // await _invoicingElementDBHelper.deleteALLRows();
           print('Proceeding to insert Company data into localDB');
           var addElementsRes = await _invoicingElementDBHelper
               .addInvoicingElements(apiElementsRes);

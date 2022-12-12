@@ -38,8 +38,8 @@ class Product {
     this.WeightUOM,
     this.Image,
     this.isSelected = false,
-    this.Description2='',
-    this.Description3='',
+    this.Description2 = '',
+    this.Description3 = '',
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -68,6 +68,7 @@ class Product {
   }
 
   Map<String, dynamic> toJson() {
+    //Changes by Mayuresh, Added Null Checks to WeightUOM, Description2 & Description3, 29-11-22
     return {
       'Id': Id,
       'ProductCode': ProductCode,
@@ -84,13 +85,16 @@ class Product {
       'UPCCode': UPCCode,
       'CreatedDate': CreatedDate,
       'UpdatedDate': UpdatedDate,
-      'WeightUOM': Weight.toString()+' '+ WeightUOM,
+      'WeightUOM':
+          Weight.toString() + ' ' + (WeightUOM != null ? WeightUOM : ""),
       'Image': Image,
       'isSelected': isSelected,
-      'Description2': Other().parseHtmlString(
-          Description2), //to remove html characters like &amp; amp; &nbsp: ,
-      'Description3': Other().parseHtmlString(
-          Description3), //to remove html characters like &amp; amp; &nbsp: ,
+      'Description2': Description2 != null
+          ? Other().parseHtmlString(Description2)
+          : "", //to remove html characters like &amp; amp; &nbsp: ,
+      'Description3': Description3 != null
+          ? Other().parseHtmlString(Description3)
+          : "", //to remove html characters like &amp; amp; &nbsp: ,
     };
   }
 }

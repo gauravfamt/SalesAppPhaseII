@@ -334,7 +334,7 @@ class ProductScreenPageState extends State<ProductScreenPage> {
       }
       return productData;
     } catch (e) {
-      print('Erro inside fetchProducts FN');
+      print('Error inside fetchProducts FN');
       print(e);
       throw Future.error(e);
     }

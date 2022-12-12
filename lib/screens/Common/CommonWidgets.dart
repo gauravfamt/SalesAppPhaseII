@@ -11,8 +11,9 @@ class CommonWidgets {
     double imgHeight,
     String errorCaption,
   }) {
+    //Changes by Mayuresh, Removed unnecessary interpolation, 29-11-22
     return Image.network(
-      '$imgURL',
+      imgURL,
       height: imgHeight,
       fit: BoxFit.fill,
 

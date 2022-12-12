@@ -197,7 +197,13 @@ class _SendMailDialogState extends State<SendMailDialog> {
   Widget build(BuildContext context) {
     isLargeScreen = isLargeScreenAvailable(context);
     _invoiceIdsFieldController.text = widget.idsData;
-    _toMailIdsFieldController.text = widget.secondaryIdsData;
+    //Changes made by Mayuresh, Sets Cursor Offset properly, 01-Dec-22
+    // _toMailIdsFieldController.text = widget.secondaryIdsData;
+    _toMailIdsFieldController.value = TextEditingValue(
+        text: widget.secondaryIdsData,
+        selection: TextSelection(
+            baseOffset: widget.secondaryIdsData.length,
+            extentOffset: widget.secondaryIdsData.length));
 
     return AlertDialog(
       title: Center(child: Text('Send Mail')),
@@ -275,18 +281,21 @@ class _SendMailDialogState extends State<SendMailDialog> {
               Form(
                 key: _formKey,
                 child: TextFormField(
-                  readOnly: isSendEmailClicked,
+                  //Changes made by Mayuresh, To Allow to write in this field all the time, 01-Dec-22
+                  readOnly: false,
                   controller: _toMailIdsFieldController,
                   keyboardType: TextInputType.multiline,
                   minLines: 1,
                   maxLines: 5,
+                  onTap: () {},
                   onChanged: (value) {
-                    _formKey.currentState.validate();
-                    if (value != null && value.trim().length > 0) {
-                      setState(() {
-                        sendMainResponse = '';
-                      });
-                    }
+                    //Changes made by Mayuresh, Removed unnecessary validations, 01-Dec-22
+                    // _formKey.currentState.validate();
+                    // if (value != null && value.trim().length > 0) {
+                    //   setState(() {
+                    //     sendMainResponse = '';
+                    //   });
+                    // }
                   },
                   validator: (value) {
                     setState(() {

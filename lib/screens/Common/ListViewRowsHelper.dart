@@ -44,15 +44,15 @@ class ListViewRowsHelper {
                       excludedFieldsList.length > 0 &&
                       !excludedFieldsList
                           .contains(standardFields[sf].FieldName)))) {
-
-            if(isProduct==true ){
-              if(classObj.toJson()[standardFields[sf].FieldName] !=''){
-                if(standardFields[sf].FieldName!='Weight'){
+            if (isProduct == true) {
+              if (classObj.toJson()[standardFields[sf].FieldName] != '') {
+                if (standardFields[sf].FieldName != 'Weight') {
                   _widgetsList.add(
                     getRowContentWidget(
                         standardFields[sf].LabelName,
                         attachCurrencyCode(
-                          value: '${classObj.toJson()[standardFields[sf].FieldName]}',
+                          value:
+                              '${classObj.toJson()[standardFields[sf].FieldName]}',
                           fieldName: standardFields[sf].FieldName,
                           currencyCaption: currencyCaption,
                         ),
@@ -60,17 +60,14 @@ class ListViewRowsHelper {
                         isProduct),
                   );
                 }
-
-
               }
-
-            }
-            else{
+            } else {
               _widgetsList.add(
                 getRowContentWidget(
                     standardFields[sf].LabelName,
                     attachCurrencyCode(
-                      value: '${classObj.toJson()[standardFields[sf].FieldName]}',
+                      value:
+                          '${classObj.toJson()[standardFields[sf].FieldName]}',
                       fieldName: standardFields[sf].FieldName,
                       currencyCaption: currencyCaption,
                     ),
@@ -78,8 +75,6 @@ class ListViewRowsHelper {
                     isProduct),
               );
             }
-
-
           }
         }
 

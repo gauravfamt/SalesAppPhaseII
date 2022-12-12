@@ -35,3 +35,4 @@ export 'TokenHelper.dart';
 export 'user.dart';
 export 'invoicingElement.dart';
 export 'quoteInvoicingElement.dart';
+export 'salesInvoicingElement.dart';

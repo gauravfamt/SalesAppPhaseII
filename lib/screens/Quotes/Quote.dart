@@ -360,12 +360,20 @@ class _QuotePageState extends State<QuotePage> {
         url = '$url&Searchtext=${searchFieldContent.trim().toUpperCase()}';
       }
       print('url--- ${url}');
+      // String tk = await Session.getData(Session.accessToken);
+      // String un = await Session.getData(Session.userName);
+
+      // log(tk);
+      // print(un);
 
       http.Client client = http.Client();
       final response = await client.get(url, headers: {
         "token": await Session.getData(Session.accessToken),
         "Username": await Session.getData(Session.userName),
       }).timeout(duration);
+      // print("response.body_S");
+      // print(response.body);
+      // print("response.body_E");
       if (response.statusCode == 200 && response.body != "No Quotes found") {
         var data = json.decode(response.body);
         if (data != 'No Quotes found') {
@@ -847,6 +855,7 @@ class _QuotePageState extends State<QuotePage> {
   ///       OTHERWISE IT'LL LOOK CONJESTED IN THE LIST VIEW
   List<Row> getActionButtonRows(int recordPosition) {
     List<Row> rowsList = List<Row>();
+
     ///ADDING THE FIRST ROW WITH ONE BUTTON FOR THE NAVIGATION
     rowsList.add(
       Row(
@@ -1436,6 +1445,7 @@ class _QuotePageState extends State<QuotePage> {
           },
           child: Icon(Icons.add),
         ),
+
         ///NOTIFICATION LISTENER ADDED TO LISTEN TO THE BOTTOM PAGE SCROLL
         ///TO LOAD NEW PAGE DATA FROM API
         body: Column(
@@ -1448,30 +1458,34 @@ class _QuotePageState extends State<QuotePage> {
                 child: ExpansionTile(
                   initiallyExpanded: isLargeScreen ? true : false,
                   title: Text('Search Quote'),
-                  children: <Widget>[Column(
-                    children: <Widget>[
-                      _commonWidgets.getListingCompanySelectorWidget(
-                        showCompanyDialogHandler: this.showCompanyDialog,
-                        clearSelectedCompanyHandler: this.clearSelectedCompany,
-                        selectedCompany: this._selectedCompany,
-                      ),
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        _commonWidgets.getListingCompanySelectorWidget(
+                          showCompanyDialogHandler: this.showCompanyDialog,
+                          clearSelectedCompanyHandler:
+                              this.clearSelectedCompany,
+                          selectedCompany: this._selectedCompany,
+                        ),
 
-                      ///STATUS DROPDOWN WIDGET
-                      _buildStatusDropdown(),
+                        ///STATUS DROPDOWN WIDGET
+                        _buildStatusDropdown(),
 
-                      ///SEARCH FIELD WIDGET
-                      SearchTextField(
-                        searchFieldContent: searchFieldContent,
-                        clearTextFieldSearch: clearTextFieldSearch,
-                        handleTextFieldSearch: handleTextFieldSearch,
-                        placeHolder: 'Search Quote',
-                      ),
-                    ],
-                  )],
+                        ///SEARCH FIELD WIDGET
+                        SearchTextField(
+                          searchFieldContent: searchFieldContent,
+                          clearTextFieldSearch: clearTextFieldSearch,
+                          handleTextFieldSearch: handleTextFieldSearch,
+                          placeHolder: 'Search Quote',
+                        ),
+                      ],
+                    )
+                  ],
                 ),
               ),
             ),
             SizedBox(height: 5.0),
+
             ///FIRST TIME LOADING DATA LOADER
             Expanded(
               child: ListView(

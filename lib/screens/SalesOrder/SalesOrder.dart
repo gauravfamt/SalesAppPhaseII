@@ -180,7 +180,9 @@ class _SalesOrderPageState extends State<SalesOrderPage> {
         print(response.body);
         var data = json.decode(response.body);
         if (data != 'No Orders found') {
-          salesOrdersData = data .map<SalesOrders>((json) => SalesOrders.fromJson(json)).toList();
+          salesOrdersData = data
+              .map<SalesOrders>((json) => SalesOrders.fromJson(json))
+              .toList();
         }
       }
       return salesOrdersData;
@@ -715,7 +717,7 @@ class _SalesOrderPageState extends State<SalesOrderPage> {
   ///IT OPENS PRODUCT LAST PRICE WIDGET
   Widget getFeatureButtonWidget() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20.0,0,20.0,0),
+      padding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 0),
       child: Row(
         children: <Widget>[
           ///CHECK_PRICE_BUTTON
@@ -820,35 +822,38 @@ class _SalesOrderPageState extends State<SalesOrderPage> {
                 elevation: 1,
                 child: ExpansionTile(
                   initiallyExpanded: isLargeScreen ? true : false,
-                  title:Text('Search Sales Order'),
-                  children: <Widget>[ Column(
-                    children: <Widget>[
-                      Visibility(
-                        visible: widget.selectedCompany == null ||
-                            widget.selectedCompany.CustomerNo == '',
-                        child: _commonWidgets.getListingCompanySelectorWidget(
-                          showCompanyDialogHandler: this.showCompanyDialog,
-                          clearSelectedCompanyHandler: this.clearSelectedCompany,
-                          selectedCompany: this._selectedCompany,
+                  title: Text('Search Sales Order'),
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        Visibility(
+                          visible: widget.selectedCompany == null ||
+                              widget.selectedCompany.CustomerNo == '',
+                          child: _commonWidgets.getListingCompanySelectorWidget(
+                            showCompanyDialogHandler: this.showCompanyDialog,
+                            clearSelectedCompanyHandler:
+                                this.clearSelectedCompany,
+                            selectedCompany: this._selectedCompany,
+                          ),
                         ),
-                      ),
 
-                      ///STATUS DROPDOWN WIDGET
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[_buildDeliveryStatusDropdown()],
-                      ),
+                        ///STATUS DROPDOWN WIDGET
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[_buildDeliveryStatusDropdown()],
+                        ),
 
-                      ///SEARCH TEXT FIELD WIDGET TO HANDLE SEARCH
-                      SearchTextField(
-                        searchFieldContent: searchFieldContent,
-                        clearTextFieldSearch: clearTextFieldSearch,
-                        handleTextFieldSearch: handleTextFieldSearch,
-                        placeHolder: 'Search Order',
-                      ),
-                    ],
-                  )],
+                        ///SEARCH TEXT FIELD WIDGET TO HANDLE SEARCH
+                        SearchTextField(
+                          searchFieldContent: searchFieldContent,
+                          clearTextFieldSearch: clearTextFieldSearch,
+                          handleTextFieldSearch: handleTextFieldSearch,
+                          placeHolder: 'Search Order',
+                        ),
+                      ],
+                    )
+                  ],
                 ),
               ),
             ),

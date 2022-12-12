@@ -45,16 +45,16 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   //Uncomment for Release
-   final TextEditingController userNameController = new TextEditingController();
-   final TextEditingController passwordController = new TextEditingController();
-   final TextEditingController apiDomainController = new TextEditingController();
+  final TextEditingController userNameController = new TextEditingController();
+  final TextEditingController passwordController = new TextEditingController();
+  final TextEditingController apiDomainController = new TextEditingController();
   //Comment for Release, By Mayuresh - S
-//  final TextEditingController userNameController =
-//      new TextEditingController(text: "x3model@gmail.com");
-//  final TextEditingController passwordController =
-//      new TextEditingController(text: "user@portal");
-//  final TextEditingController apiDomainController =
-//      new TextEditingController(text: "http://49.248.14.237:8185/api/v1.0/");
+  // final TextEditingController userNameController =
+  //     new TextEditingController(text: "x3model@gmail.com");
+  // final TextEditingController passwordController =
+  //     new TextEditingController(text: "user@portal");
+  // final TextEditingController apiDomainController =
+  //     new TextEditingController(text: "http://49.248.14.237:8185/api/v1.0/");
   //Mayuresh - E
   bool isVisible = true;
 
@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         isFullScreenLoading = true;
       });
-      print("${apiDomain}/${URLs.LOGIN}?username=$userName&password=$password");
+      print('${apiDomain}${URLs.LOGIN}?username=$userName&password=$password');
       final http.Response response = await http.post(
         '${apiDomain}${URLs.LOGIN}?username=$userName&password=$password',
         headers: <String, String>{
@@ -197,6 +197,9 @@ class _LoginPageState extends State<LoginPage> {
   saveSession(String userName, String password, String accessToken,
       String apiDomain) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (apiDomain.endsWith('/')) {
+      apiDomain = apiDomain.substring(0, apiDomain.length);
+    }
     prefs.setString(Session.userName, userName);
     prefs.setString(Session.accessToken, accessToken);
     prefs.setString(Session.password, password);

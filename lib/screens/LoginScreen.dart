@@ -197,9 +197,6 @@ class _LoginPageState extends State<LoginPage> {
   saveSession(String userName, String password, String accessToken,
       String apiDomain) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (apiDomain.endsWith('/')) {
-      apiDomain = apiDomain.substring(0, apiDomain.length);
-    }
     prefs.setString(Session.userName, userName);
     prefs.setString(Session.accessToken, accessToken);
     prefs.setString(Session.password, password);

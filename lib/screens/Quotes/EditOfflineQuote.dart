@@ -5785,7 +5785,7 @@ class _EditOfflineQuoteState extends State<EditOfflineQuote> {
   void fetchInvoicingElements() {
     try {
       print('fetchInvoicingElements');
-      invoicingElementDBHelper.getAllInvoiceElements().then((invElementsRes) {
+      invoicingElementDBHelper.getActiveInvoiceElements().then((invElementsRes) {
         quoteInvoicingElementDBHelper
             .getInvoicingElementByQuoteHederNo(QuoteHeaderId: widget.quoteId)
             .then((quoteInvElmentdata) {

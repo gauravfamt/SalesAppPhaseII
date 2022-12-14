@@ -18,6 +18,7 @@ class InvoicingElementDBHelper {
                     Id INTEGER ,
                     Code TEXT PRIMARY KEY,
                     Description TEXT,
+                    SequenceNumber INTEGER,
                     CreatedDate datetime,
                     UpdatedDate datetime
           )
@@ -33,6 +34,7 @@ class InvoicingElementDBHelper {
                     Id INTEGER ,
                     Code TEXT PRIMARY KEY,
                     Description TEXT,
+                    SequenceNumber INTEGER,
                     CreatedDate datetime,
                     UpdatedDate datetime
           )
@@ -107,15 +109,15 @@ class InvoicingElementDBHelper {
       print('Inside addInvoicingElements after database connection received!');
       String values = "";
       for (var i = 0; i < elements.length; i++) {
-        InvoicingElement singleProduct = elements[i];
+        InvoicingElement singleElement = elements[i];
         values += '''(
-         ${singleProduct.id}, "${getFormattedString(singleProduct.code)}" , "${getFormattedString(singleProduct.description)}","${singleProduct.createdDate}" , "${singleProduct.updatedDate}"  
+         ${singleElement.id}, "${getFormattedString(singleElement.code)}" , "${getFormattedString(singleElement.description)}",${singleElement.sequenceNumber},  "${singleElement.createdDate}" , "${singleElement.updatedDate}"  
          ) , ''';
       }
       values = values.substring(0, values.lastIndexOf(',') - 1);
 
       var res = await db.rawInsert(''' 
-    INSERT OR REPLACE INTO $tableName ( Id,  Code , Description, CreatedDate , UpdatedDate ) 
+    INSERT OR REPLACE INTO $tableName ( Id,  Code , Description,SequenceNumber, CreatedDate , UpdatedDate ) 
           VALUES $values  
     ''');
 
@@ -149,6 +151,28 @@ class InvoicingElementDBHelper {
     }
   }
 
+  Future <List<InvoicingElement>> getActiveInvoiceElements() async {
+    try {
+      List<InvoicingElement> _invoiceElement = List<InvoicingElement>();
+      final db = await DBProvider.db.database;
+      String _query = 'SELECT * FROM $tableName where SequenceNumber >0';
+      print('getInvoiceElementByCode Query : $_query');
+      var res = await db.rawQuery(_query);
+      print(res);
+      List<InvoicingElement> _list = res.isNotEmpty
+          ? res.map((c) => InvoicingElement.fromJson(c)).toList()
+          : [];
+
+      _invoiceElement.addAll(_list);
+      return _invoiceElement;
+    } catch (e) {
+      print('Error Inside getInvoiceElementByCode FN ');
+      print(e);
+      return Future.error(e);
+    }
+  }
+
+
   ///IT RETURNS THE INVOICE ELEMENT LIST FROM CODE's PROVIDED
   Future<List<InvoicingElement>> getInvoiceElementByCode({
     List<String> codeList,
@@ -177,6 +201,30 @@ class InvoicingElementDBHelper {
       print('Error Inside getInvoiceElementByCode FN ');
       print(e);
       return Future.error(e);
+    }
+  }
+
+  Future alterInvoicingElementTable() async {
+    try {
+      print('------InvoicingElementTable');
+      var res=false;
+      final db = await DBProvider.db.database;
+      var sqltQuery = " PRAGMA table_info($tableName) ";
+      var ress = await db.rawQuery(sqltQuery);
+      print('--PRAGMA----${ress}');
+      if(!ress.toString().contains('SequenceNumber')){
+        sqltQuery="alter table $tableName add column SequenceNumber INTEGER ";
+        print('------#$sqltQuery');
+        await db.rawQuery(sqltQuery);
+        res=true;
+      }
+
+      return res;
+    } catch (e) {
+      print('Error inside alterInvoicingElementTable');
+      print(e);
+//      return 'Unable to insert data into DB for Products';
+      throw Future.error(e);
     }
   }
 

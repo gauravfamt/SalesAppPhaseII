@@ -734,7 +734,7 @@ class _AddQuotePageState extends State<AddQuotePage> {
 
   void fetchInvoicingElements() {
     try {
-      invoicingElementDBHelper.getAllInvoiceElements().then((invElementsRes) {
+      invoicingElementDBHelper.getActiveInvoiceElements().then((invElementsRes) {
         print("Fill Sales Invoice Elements");
         for (InvoicingElement element in invElementsRes) {
           quoteInvElement.add(new QuoteInvElement(
@@ -2191,7 +2191,7 @@ class _AddQuotePageState extends State<AddQuotePage> {
 
       if (widget.listingQuoteObj.quoteInvoicingElement.length > 0) {
         quoteInvElement = [];
-        invoicingElementDBHelper.getAllInvoiceElements().then((invElementsRes) {
+        invoicingElementDBHelper.getActiveInvoiceElements().then((invElementsRes) {
           print("Fill Sales Invoice Elements");
           for (InvoicingElement element in invElementsRes) {
             var objQuoteInvElm = widget.listingQuoteObj.quoteInvoicingElement

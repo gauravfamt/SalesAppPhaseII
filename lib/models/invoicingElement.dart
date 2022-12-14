@@ -15,6 +15,7 @@ class InvoicingElement {
     this.id,
     this.code,
     this.description,
+    this.sequenceNumber,
     this.createdDate,
     this.updatedDate,
   });
@@ -22,6 +23,7 @@ class InvoicingElement {
   int id;
   String code;
   String description;
+  int sequenceNumber;
   DateTime createdDate;
   DateTime updatedDate;
 
@@ -30,6 +32,7 @@ class InvoicingElement {
         id: json["Id"],
         code: json["Code"].toString(),
         description: json["Description"].toString(),
+        sequenceNumber:int.parse(json["SequenceNumber"].toString()),
         createdDate: json["CreatedDate"] != null
             ? DateTime.tryParse(json["CreatedDate"].toString())
             : DateTime.now(),
@@ -42,6 +45,7 @@ class InvoicingElement {
         "Id": id,
         "Code": code,
         "Description": description,
+        "SequenceNumber":sequenceNumber,
         "CreatedDate":
             createdDate != null ? createdDate.toIso8601String() : null,
         "UpdatedDate":
